@@ -1,4 +1,5 @@
 using ContentManagement.Domain.Aggregates;
+using ContentManagement.Domain.Entities;
 using ContentManagement.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,18 +14,10 @@ public class ContentManagementDbContext : DbContext
 
     public DbSet<Curso> Cursos { get; set; }
     public DbSet<Aula> Aulas { get; set; }
-    public DbSet<Usuario> Usuarios { get; set; }
-    public DbSet<Persona> Personas { get; set; }
-    public DbSet<Aluno> Alunos { get; set; }
-    public DbSet<Administrador> Administradores { get; set; }
-    public DbSet<Matricula> Matriculas { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new CursoConfiguration());
         modelBuilder.ApplyConfiguration(new AulaConfiguration());
-        modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
-        modelBuilder.ApplyConfiguration(new PersonaConfiguration());
-        modelBuilder.ApplyConfiguration(new MatriculaConfiguration());
     }
 }

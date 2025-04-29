@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,23 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Content\ContentManagement.Application\ContentManagement.Application.csproj" />
-    <ProjectReference Include="..\Content\ContentManagement.Domain\ContentManagement.Domain.csproj" />
-    <ProjectReference Include="..\Content\ContentManagement.Infrastructure\ContentManagement.Infrastructure.csproj" />
-    <ProjectReference Include="..\Student\StudentManagement.Application\StudentManagement.Application.csproj" />
-    <ProjectReference Include="..\Student\StudentManagement.Infrastructure\StudentManagement.Infrastructure.csproj" />
-    <ProjectReference Include="..\Payment\PaymentBilling.Application\PaymentBilling.Application.csproj" />
-    <ProjectReference Include="..\Payment\PaymentBilling.Infrastructure\PaymentBilling.Infrastructure.csproj" />
+    <ProjectReference Include="..\ContentManagement\ContentManagement.Application\ContentManagement.Application.csproj" />
+    <ProjectReference Include="..\ContentManagement\ContentManagement.Infrastructure\ContentManagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\PaymentBilling\PaymentBilling.Application\PaymentBilling.Application.csproj" />
+    <ProjectReference Include="..\PaymentBilling\PaymentBilling.Domain\PaymentBilling.Domain.csproj" />
   </ItemGroup>
 
 </Project>

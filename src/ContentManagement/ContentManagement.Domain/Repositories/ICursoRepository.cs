@@ -1,13 +1,14 @@
 using ContentManagement.Domain.Aggregates;
 
-namespace ContentManagement.Domain.Repositories;
-
-public interface ICursoRepository
+namespace ContentManagement.Domain.Repositories
 {
-    Task<Curso> ObterPorIdAsync(Guid id);
-    Task<IEnumerable<Curso>> ObterTodosAsync();
-    Task<IEnumerable<Curso>> ObterAtivosAsync();
-    Task AdicionarAsync(Curso curso);
-    Task AtualizarAsync(Curso curso);
-    Task RemoverAsync(Curso curso);
+    public interface ICursoRepository
+    {
+        Task<Curso> GetByIdAsync(Guid id);
+        Task<IEnumerable<Curso>> GetAllAsync();
+        Task<Curso> AddAsync(Curso curso);
+        Task UpdateAsync(Curso curso);
+        Task DeleteAsync(Guid id);
+        Task<bool> ExistsAsync(Guid id);
+    }
 }

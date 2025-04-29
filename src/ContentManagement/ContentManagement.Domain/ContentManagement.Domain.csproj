@@ -6,4 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Aggregates\Administrador.cs" />
+    <Compile Remove="Aggregates\Aluno.cs" />
+    <Compile Remove="Aggregates\Matricula.cs" />
+    <Compile Remove="Aggregates\Persona.cs" />
+    <Compile Remove="Aggregates\Usuario.cs" />
+  </ItemGroup>
+
 </Project>

@@ -1,19 +1,19 @@
 using ContentManagement.Domain.Repositories;
-using ContentManagement.Infrastructure.Context;
-using ContentManagement.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using OnlineEducationPlatform.API.Services;
+using OnlineEducationPlatform.API.Services.Identity;
+using ContentManagement.Infrastructure.Data;
+using ContentManagement.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -44,11 +44,39 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Register Auth Service
-builder.Services.AddScoped<IAuthService, AuthService>();
+// Configure DbContext
+builder.Services.AddDbContext<ContentManagementContext>(options =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseSqlite("Data Source=ContentManagement.db");
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+});
+
+// Register repositories
+builder.Services.AddScoped<ICursoRepository, CursoRepository>();
+builder.Services.AddScoped<IAulaRepository, AulaRepository>();
+
+// Register MediatR
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(ContentManagement.Application.Commands.CriarCursoCommand).Assembly);
+});
+
+// Configure Identity Service
+builder.Services.AddHttpClient<IIdentityService, IdentityService>();
 
 // Configure JWT Authentication
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+    throw new InvalidOperationException("JWT Key is not configured.");
+
+var key = Encoding.ASCII.GetBytes(jwtKey);
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -62,28 +90,26 @@ builder.Services.AddAuthentication(x =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ClockSkew = TimeSpan.Zero
     };
 });
 
 // Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
+    options.AddPolicy("AllowSpecificOrigins",
         builder =>
         {
-            builder.AllowAnyOrigin()
+            builder.WithOrigins(builder.Environment.IsDevelopment() ? "http://localhost:3000" : "https://your-production-url.com")
                    .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowCredentials();
         });
 });
-
-// Configure Database
-builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.IsDevelopment());
-
-// Register Repositories
-builder.Services.AddScoped<ICursoRepository, CursoRepository>();
 
 var app = builder.Build();
 
@@ -92,23 +118,33 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    // Seed database
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<ContentManagementDbContext>();
-        await ContentManagementDbSeeder.SeedAsync(context);
-    }
 }
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecificOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var contentContext = services.GetRequiredService<ContentManagementContext>();
+        contentContext.Database.EnsureCreated();
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Database initialized successfully.");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while creating the database.");
+    }
+}
 
 app.Run();

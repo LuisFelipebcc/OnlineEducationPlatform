@@ -1,58 +1,85 @@
-using System;
-
 namespace StudentManagement.Domain.Entities;
 
 public class Student
 {
     public Guid Id { get; private set; }
-    public string Name { get; private set; }
+    public string Nome { get; private set; }
     public string Email { get; private set; }
-    public string Phone { get; private set; }
-    public DateTime BirthDate { get; private set; }
-    public string Address { get; private set; }
+    public string CPF { get; private set; }
+    public DateTime DataNascimento { get; private set; }
     public StudentStatus Status { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
+    public HistoricoAprendizado HistoricoAprendizado { get; private set; }
+    private readonly List<Matricula> _matriculas;
+    public IReadOnlyCollection<Matricula> Matriculas => _matriculas.AsReadOnly();
+    private readonly List<Certificado> _certificados;
+    public IReadOnlyCollection<Certificado> Certificados => _certificados.AsReadOnly();
 
-    private Student() { }
-
-    public Student(string name, string email, string phone, DateTime birthDate, string address)
+    // Construtor protegido para o Entity Framework
+    protected Student()
     {
+        _matriculas = new List<Matricula>();
+        _certificados = new List<Certificado>();
+    }
+
+    // Construtor público
+    public Student(string nome, string email, string cpf, DateTime dataNascimento)
+    {
+        if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
+        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email não pode ser vazio.", nameof(email));
+        if (string.IsNullOrWhiteSpace(cpf)) throw new ArgumentException("CPF não pode ser vazio.", nameof(cpf));
+        if (dataNascimento > DateTime.UtcNow) throw new ArgumentException("Data de nascimento não pode ser no futuro.", nameof(dataNascimento));
+
         Id = Guid.NewGuid();
-        Name = name;
+        Nome = nome;
         Email = email;
-        Phone = phone;
-        BirthDate = birthDate;
-        Address = address;
+        CPF = cpf;
+        DataNascimento = dataNascimento;
         Status = StudentStatus.Active;
-        CreatedAt = DateTime.UtcNow;
+        HistoricoAprendizado = new HistoricoAprendizado();
+        _matriculas = new List<Matricula>();
+        _certificados = new List<Certificado>();
     }
 
-    public void Update(string name, string email, string phone, string address)
+    public void AdicionarMatricula(Matricula matricula)
     {
-        Name = name;
-        Email = email;
-        Phone = phone;
-        Address = address;
-        UpdatedAt = DateTime.UtcNow;
+        if (matricula == null)
+            throw new ArgumentNullException(nameof(matricula));
+
+        _matriculas.Add(matricula);
     }
 
-    public void Deactivate()
+    public void AdicionarCertificado(Certificado certificado)
     {
-        if (Status == StudentStatus.Inactive)
-            throw new InvalidOperationException("Student is already inactive");
+        if (certificado == null)
+            throw new ArgumentNullException(nameof(certificado));
 
-        Status = StudentStatus.Inactive;
-        UpdatedAt = DateTime.UtcNow;
+        _certificados.Add(certificado);
     }
 
-    public void Activate()
+    public void AtualizarNome(string novoNome)
     {
-        if (Status == StudentStatus.Active)
-            throw new InvalidOperationException("Student is already active");
+        if (string.IsNullOrWhiteSpace(novoNome))
+            throw new ArgumentException("O nome do aluno não pode ser vazio", nameof(novoNome));
 
-        Status = StudentStatus.Active;
-        UpdatedAt = DateTime.UtcNow;
+        Nome = novoNome;
+    }
+
+    public void AtualizarEmail(string novoEmail)
+    {
+        if (string.IsNullOrWhiteSpace(novoEmail))
+            throw new ArgumentException("O email do aluno não pode ser vazio", nameof(novoEmail));
+
+        Email = novoEmail;
+    }
+
+    public void RegistrarProgresso(Guid cursoId, int percentualConcluido)
+    {
+        HistoricoAprendizado.RegistrarProgresso(cursoId, percentualConcluido);
+    }
+
+    public void AlterarStatus(StudentStatus novoStatus)
+    {
+        Status = novoStatus;
     }
 }
 

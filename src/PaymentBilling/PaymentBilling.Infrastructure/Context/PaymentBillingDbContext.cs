@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PaymentBilling.Domain.Entities;
+using StudentManagement.Domain.Entities;
 
 namespace PaymentBilling.Infrastructure.Context;
 
@@ -16,10 +17,41 @@ public class PaymentBillingDbContext : DbContext
     {
         modelBuilder.Entity<Payment>(entity =>
         {
+            // Nome da tabela
+            entity.ToTable("Pagamentos");
+
+            // Chave primária
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Amount).HasPrecision(18, 2);
-            entity.Property(e => e.Status).HasConversion<string>();
-            entity.Property(e => e.Method).HasConversion<string>();
+
+            // Configuração de propriedades
+            entity.Property(e => e.Valor)
+                .HasPrecision(18, 2);
+
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .IsRequired();
+
+            entity.Property(e => e.MetodoPagamento)
+                .HasConversion<string>()
+                .IsRequired();
+
+            entity.Property(e => e.NumeroTransacao)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.Observacoes)
+                .HasMaxLength(500);
+
+            // Relacionamentos
+            entity.HasOne<Student>()
+                .WithMany()
+                .HasForeignKey(e => e.AlunoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne<Matricula>()
+                .WithMany()
+                .HasForeignKey(e => e.MatriculaId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

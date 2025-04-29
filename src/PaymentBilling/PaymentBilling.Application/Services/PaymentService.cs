@@ -1,9 +1,10 @@
+using PaymentBilling.Application.Interfaces;
 using PaymentBilling.Domain.Entities;
 using PaymentBilling.Domain.Interfaces;
 
 namespace PaymentBilling.Application.Services;
 
-public class PaymentService
+public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _paymentRepository;
 
@@ -12,38 +13,58 @@ public class PaymentService
         _paymentRepository = paymentRepository;
     }
 
-    public async Task<Payment> CreatePaymentAsync(Guid userId, Guid courseId, decimal amount, PaymentMethod method)
-    {
-        var payment = new Payment(userId, courseId, amount, method);
-        return await _paymentRepository.AddAsync(payment);
-    }
-
-    public async Task<Payment> GetPaymentByIdAsync(Guid id)
+    public async Task<Payment> GetByIdAsync(Guid id)
     {
         return await _paymentRepository.GetByIdAsync(id);
     }
 
-    public async Task<IEnumerable<Payment>> GetUserPaymentsAsync(Guid userId)
+    public async Task<IEnumerable<Payment>> GetAllAsync()
     {
-        return await _paymentRepository.GetByUserIdAsync(userId);
+        return await _paymentRepository.GetAllAsync();
     }
 
-    public async Task<IEnumerable<Payment>> GetCoursePaymentsAsync(Guid courseId)
+    public async Task<IEnumerable<Payment>> GetByAlunoIdAsync(Guid alunoId)
     {
-        return await _paymentRepository.GetByCourseIdAsync(courseId);
+        return await _paymentRepository.GetByAlunoIdAsync(alunoId);
     }
 
-    public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
+    public async Task<IEnumerable<Payment>> GetByMatriculaIdAsync(Guid matriculaId)
     {
-        var payment = await _paymentRepository.GetByIdAsync(paymentId);
-        if (payment == null)
-            throw new InvalidOperationException("Payment not found");
+        return await _paymentRepository.GetByMatriculaIdAsync(matriculaId);
+    }
 
-        // Simular processamento de pagamento
-        // Em um cenário real, aqui seria feita a integração com o gateway de pagamento
-        await Task.Delay(1000); // Simular delay de processamento
+    public async Task<Payment> CreatePagamentoAsync(Payment pagamento)
+    {
+        return await _paymentRepository.AddAsync(pagamento);
+    }
 
-        payment.MarkAsPaid();
-        return await _paymentRepository.UpdateAsync(payment);
+    public async Task ConfirmarPagamentoAsync(Guid id)
+    {
+        var pagamento = await _paymentRepository.GetByIdAsync(id);
+        if (pagamento == null)
+            throw new KeyNotFoundException("Pagamento não encontrado.");
+
+        pagamento.ConfirmarPagamento();
+        await _paymentRepository.UpdateAsync(pagamento);
+    }
+
+    public async Task CancelarPagamentoAsync(Guid id, string motivo)
+    {
+        var pagamento = await _paymentRepository.GetByIdAsync(id);
+        if (pagamento == null)
+            throw new KeyNotFoundException("Pagamento não encontrado.");
+
+        pagamento.CancelarPagamento(motivo);
+        await _paymentRepository.UpdateAsync(pagamento);
+    }
+
+    public async Task ReembolsarPagamentoAsync(Guid id, string motivo)
+    {
+        var pagamento = await _paymentRepository.GetByIdAsync(id);
+        if (pagamento == null)
+            throw new KeyNotFoundException("Pagamento não encontrado.");
+
+        pagamento.ReembolsarPagamento(motivo);
+        await _paymentRepository.UpdateAsync(pagamento);
     }
 }

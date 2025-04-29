@@ -1,26 +1,47 @@
+using System;
+using System.Collections.Generic;
+
 namespace ContentManagement.Domain.ValueObjects;
 
 public class ConteudoProgramatico
 {
-    public string Titulo { get; private set; }
     public string Descricao { get; private set; }
-    public int Ordem { get; private set; }
+    public List<string> Objetivos { get; private set; }
+    public List<string> PreRequisitos { get; private set; }
 
-    private ConteudoProgramatico() { }
+    protected ConteudoProgramatico() { }
 
-    public ConteudoProgramatico(string titulo, string descricao, int ordem)
+    public ConteudoProgramatico(string descricao, List<string> objetivos, List<string> preRequisitos)
     {
-        if (string.IsNullOrWhiteSpace(titulo))
-            throw new ArgumentException("O título não pode ser vazio", nameof(titulo));
-
         if (string.IsNullOrWhiteSpace(descricao))
             throw new ArgumentException("A descrição não pode ser vazia", nameof(descricao));
 
-        if (ordem <= 0)
-            throw new ArgumentException("A ordem deve ser maior que zero", nameof(ordem));
-
-        Titulo = titulo;
         Descricao = descricao;
-        Ordem = ordem;
+        Objetivos = objetivos ?? new List<string>();
+        PreRequisitos = preRequisitos ?? new List<string>();
+    }
+
+    public void AtualizarDescricao(string novaDescricao)
+    {
+        if (string.IsNullOrWhiteSpace(novaDescricao))
+            throw new ArgumentException("A descrição não pode ser vazia", nameof(novaDescricao));
+
+        Descricao = novaDescricao;
+    }
+
+    public void AdicionarObjetivo(string objetivo)
+    {
+        if (string.IsNullOrWhiteSpace(objetivo))
+            throw new ArgumentException("O objetivo não pode ser vazio", nameof(objetivo));
+
+        Objetivos.Add(objetivo);
+    }
+
+    public void AdicionarPreRequisito(string preRequisito)
+    {
+        if (string.IsNullOrWhiteSpace(preRequisito))
+            throw new ArgumentException("O pré-requisito não pode ser vazio", nameof(preRequisito));
+
+        PreRequisitos.Add(preRequisito);
     }
 }

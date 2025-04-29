@@ -1,48 +1,90 @@
 using ContentManagement.Application.DTOs;
 using ContentManagement.Domain.Aggregates;
-using ContentManagement.Domain.Entities;
+using ContentManagement.Domain.Enums;
+using ContentManagement.Domain.Repositories;
 using ContentManagement.Domain.ValueObjects;
+using MediatR;
 
-namespace ContentManagement.Application.Mappings;
+namespace ContentManagement.Application.Commands.Handlers;
 
-public static class CursoMapping
+public class CriarCursoCommandHandler : IRequestHandler<CriarCursoCommand, CursoDTO>
 {
-    public static CursoDTO ToDTO(this Curso curso)
+    private readonly ICursoRepository _cursoRepository;
+
+    public CriarCursoCommandHandler(ICursoRepository cursoRepository)
     {
-        return new CursoDTO
-        {
-            Id = curso.Id,
-            Titulo = curso.Titulo,
-            Descricao = curso.Descricao,
-            Preco = curso.Preco,
-            Duracao = curso.Duracao,
-            Nivel = curso.Nivel,
-            Status = curso.Status,
-            DataCriacao = curso.DataCriacao,
-            DataAtualizacao = curso.DataAtualizacao,
-            Aulas = curso.Aulas.Select(a => a.ToDTO())
-        };
+        _cursoRepository = cursoRepository;
     }
 
-    public static AulaDTO ToDTO(this Aula aula)
+    public async Task<CursoDTO> Handle(CriarCursoCommand request, CancellationToken cancellationToken)
     {
-        return new AulaDTO
-        {
-            Id = aula.Id,
-            Titulo = aula.Titulo,
-            Descricao = aula.Descricao,
-            Ordem = aula.Ordem,
-            ConteudoProgramatico = aula.ConteudoProgramatico.ToDTO()
-        };
-    }
+        // Validação dos dados do comando
+        if (string.IsNullOrWhiteSpace(request.Nome))
+            throw new ArgumentException("O nome do curso é obrigatório.", nameof(request.Nome));
 
-    public static ConteudoProgramaticoDTO ToDTO(this ConteudoProgramatico conteudo)
-    {
-        return new ConteudoProgramaticoDTO
+        if (string.IsNullOrWhiteSpace(request.DescricaoConteudo))
+            throw new ArgumentException("A descrição do conteúdo programático é obrigatória.", nameof(request.DescricaoConteudo));
+
+        if (request.Objetivos == null || !request.Objetivos.Any())
+            throw new ArgumentException("Pelo menos um objetivo deve ser informado.", nameof(request.Objetivos));
+
+        if (request.PreRequisitos == null)
+            request.PreRequisitos = new List<string>();
+
+        // Criação do Value Object ConteudoProgramatico
+        var conteudoProgramatico = new ConteudoProgramatico(
+            request.DescricaoConteudo,
+            request.Objetivos,
+            request.PreRequisitos
+        );
+
+        // Criação da entidade Curso
+        var curso = new Curso(request.Nome, conteudoProgramatico);
+
+        // Persistência no repositório
+        builder.HasOne<Curso>()
+            .WithMany(c => c.Aulas)
+            .HasForeignKey(a => a.CursoId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.OwnsOne(a => a.ConteudoProgramatico, cp =>
         {
-            Titulo = conteudo.Titulo,
-            Descricao = conteudo.Descricao,
-            Ordem = conteudo.Ordem
+            cp.Property(c => c.Descricao)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            cp.Property(c => c.Objetivos)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                )
+                .HasColumnName("Objetivos")
+                .IsRequired(false);
+
+            cp.Property(c => c.PreRequisitos)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                )
+                .HasColumnName("PreRequisitos")
+                .IsRequired(false);
+        });
+        var cursoCriado = await _cursoRepository.AddAsync(curso);
+
+        // Mapeamento para DTO
+        var cursoDTO = new CursoDTO
+        {
+            Id = cursoCriado.Id,
+            Titulo = cursoCriado.Nome,
+            Descricao = cursoCriado.ConteudoProgramatico.Descricao,
+            Preco = 0, // Preço não está no comando, ajuste conforme necessário
+            Duracao = 0, // Duração não está no comando, ajuste conforme necessário
+            Nivel = string.Empty, // Nível não está no comando, ajuste conforme necessário
+            Status = StatusCurso.Ativo,
+            DataCriacao = DateTime.UtcNow,
+            DataAtualizacao = null,
+            Aulas = new List<AulaDTO>() // Inicialmente sem aulas
         };
+
+        return cursoDTO;
     }
 }

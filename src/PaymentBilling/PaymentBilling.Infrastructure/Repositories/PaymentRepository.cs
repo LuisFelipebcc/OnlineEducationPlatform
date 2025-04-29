@@ -19,18 +19,9 @@ public class PaymentRepository : IPaymentRepository
         return await _context.Payments.FindAsync(id);
     }
 
-    public async Task<IEnumerable<Payment>> GetByUserIdAsync(Guid userId)
+    public async Task<IEnumerable<Payment>> GetAllAsync()
     {
-        return await _context.Payments
-            .Where(p => p.UserId == userId)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Payment>> GetByCourseIdAsync(Guid courseId)
-    {
-        return await _context.Payments
-            .Where(p => p.CourseId == courseId)
-            .ToListAsync();
+        return await _context.Payments.ToListAsync();
     }
 
     public async Task<Payment> AddAsync(Payment payment)
@@ -56,5 +47,19 @@ public class PaymentRepository : IPaymentRepository
         _context.Payments.Remove(payment);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<IEnumerable<Payment>> GetByAlunoIdAsync(Guid alunoId)
+    {
+        return await _context.Payments
+            .Where(p => p.AlunoId == alunoId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Payment>> GetByMatriculaIdAsync(Guid matriculaId)
+    {
+        return await _context.Payments
+            .Where(p => p.MatriculaId == matriculaId)
+            .ToListAsync();
     }
 }

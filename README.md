@@ -1,102 +1,91 @@
-# **[Título do Projeto] - Aplicação de Blog Simples com MVC e API RESTful**
+# Plataforma de Educação Online
 
-## **1. Apresentação**
+Este projeto é uma plataforma de educação online desenvolvida com ASP.NET Core, seguindo os princípios do Domain-Driven Design (DDD), Command Query Responsibility Segregation (CQRS) e Test-Driven Development (TDD).
 
-Bem-vindo ao repositório do projeto **[Título do Projeto]**. Este projeto é uma entrega do MBA DevXpert Full Stack .NET e é referente ao módulo **Introdução ao Desenvolvimento ASP.NET Core**.
-O objetivo principal desenvolver uma aplicação de blog que permite aos usuários criar, editar, visualizar e excluir posts e comentários, tanto através de uma interface web utilizando MVC quanto através de uma API RESTful.
-Descreva livremente mais detalhes do seu projeto aqui.
+## Estrutura do Projeto
 
-### **Autor(es)**
-- **Nome 1**
-- **Nome 2**
+O projeto está organizado em bounded contexts (BCs) para separar as responsabilidades do domínio:
 
-## **2. Proposta do Projeto**
+1. **ContentManagement**: Responsável pela gestão de cursos e aulas
+2. **StudentManagement**: Responsável pela gestão de alunos e matrículas
+3. **PaymentBilling**: Responsável pelo processamento de pagamentos
 
-O projeto consiste em:
+### Arquitetura
 
-- **Aplicação MVC:** Interface web para interação com o blog.
-- **API RESTful:** Exposição dos recursos do blog para integração com outras aplicações ou desenvolvimento de front-ends alternativos.
-- **Autenticação e Autorização:** Implementação de controle de acesso, diferenciando administradores e usuários comuns.
-- **Acesso a Dados:** Implementação de acesso ao banco de dados através de ORM.
+Cada bounded context segue uma arquitetura em camadas:
 
-## **3. Tecnologias Utilizadas**
+- **Domain**: Contém as entidades, value objects e interfaces dos repositórios
+- **Application**: Contém os comandos, queries e handlers do CQRS
+- **Infrastructure**: Contém as implementações dos repositórios e configurações do Entity Framework
 
-- **Linguagem de Programação:** C#
-- **Frameworks:**
-  - ASP.NET Core MVC
-  - ASP.NET Core Web API
-  - Entity Framework Core
-- **Banco de Dados:** SQL Server
-- **Autenticação e Autorização:**
-  - ASP.NET Core Identity
-  - JWT (JSON Web Token) para autenticação na API
-- **Front-end:**
-  - Razor Pages/Views
-  - HTML/CSS para estilização básica
-- **Documentação da API:** Swagger
+## Tecnologias Utilizadas
 
-## **4. Estrutura do Projeto**
+- ASP.NET Core 7.0
+- Entity Framework Core
+- SQL Server / SQLite
+- MediatR (CQRS)
+- JWT Authentication
+- Swagger/OpenAPI
+- xUnit (Testes)
 
-A estrutura do projeto é organizada da seguinte forma:
+## Requisitos
 
+- .NET 7.0 SDK
+- SQL Server (para produção)
+- SQLite (para desenvolvimento)
 
-- src/
-  - Blog.Web/ - Projeto MVC
-  - Blog.Api/ - API RESTful
-  - Blog.Data/ - Modelos de Dados e Configuração do EF Core
-- README.md - Arquivo de Documentação do Projeto
-- FEEDBACK.md - Arquivo para Consolidação dos Feedbacks
-- .gitignore - Arquivo de Ignoração do Git
+## Configuração do Ambiente
 
-## **5. Funcionalidades Implementadas**
+1. Clone o repositório
+2. Restaure os pacotes NuGet:
+   ```
+   dotnet restore
+   ```
+3. Execute as migrações do banco de dados:
+   ```
+   dotnet ef database update
+   ```
+4. Execute o projeto:
+   ```
+   dotnet run
+   ```
 
-- **CRUD para Posts e Comentários:** Permite criar, editar, visualizar e excluir posts e comentários.
-- **Autenticação e Autorização:** Diferenciação entre usuários comuns e administradores.
-- **API RESTful:** Exposição de endpoints para operações CRUD via API.
-- **Documentação da API:** Documentação automática dos endpoints da API utilizando Swagger.
+## Testes
 
-## **6. Como Executar o Projeto**
+Para executar os testes:
 
-### **Pré-requisitos**
+```
+dotnet test
+```
 
-- .NET SDK 8.0 ou superior
-- SQL Server
-- Visual Studio 2022 ou superior (ou qualquer IDE de sua preferência)
-- Git
+## API Endpoints
 
-### **Passos para Execução**
+### Cursos
 
-1. **Clone o Repositório:**
-   - `git clone https://github.com/seu-usuario/nome-do-repositorio.git`
-   - `cd nome-do-repositorio`
+- `POST /api/cursos`: Criar um novo curso
+- `GET /api/cursos/{id}`: Obter um curso por ID
 
-2. **Configuração do Banco de Dados:**
-   - No arquivo `appsettings.json`, configure a string de conexão do SQL Server.
-   - Rode o projeto para que a configuração do Seed crie o banco e popule com os dados básicos
+### Aulas
 
-3. **Executar a Aplicação MVC:**
-   - `cd src/Blog.Mvc/`
-   - `dotnet run`
-   - Acesse a aplicação em: http://localhost:5000
+- `POST /api/aulas`: Criar uma nova aula
+- `GET /api/aulas/{id}`: Obter uma aula por ID
+- `GET /api/cursos/{cursoId}/aulas`: Obter todas as aulas de um curso
 
-4. **Executar a API:**
-   - `cd src/Blog.Api/`
-   - `dotnet run`
-   - Acesse a documentação da API em: http://localhost:5001/swagger
+## Autenticação
 
-## **7. Instruções de Configuração**
+A API utiliza autenticação JWT. Para obter um token:
 
-- **JWT para API:** As chaves de configuração do JWT estão no `appsettings.json`.
-- **Migrações do Banco de Dados:** As migrações são gerenciadas pelo Entity Framework Core. Não é necessário aplicar devido a configuração do Seed de dados.
+1. Faça login com suas credenciais
+2. Use o token retornado no header `Authorization: Bearer {token}`
 
-## **8. Documentação da API**
+## Contribuição
 
-A documentação da API está disponível através do Swagger. Após iniciar a API, acesse a documentação em:
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-http://localhost:5001/swagger
+## Licença
 
-## **9. Avaliação**
-
-- Este projeto é parte de um curso acadêmico e não aceita contribuições externas. 
-- Para feedbacks ou dúvidas utilize o recurso de Issues
-- O arquivo `FEEDBACK.md` é um resumo das avaliações do instrutor e deverá ser modificado apenas por ele.
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.

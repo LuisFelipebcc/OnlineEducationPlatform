@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\StudentManagement.Domain\StudentManagement.Domain.csproj" />
+    <ProjectReference Include="..\StudentManagement.Infrastructure\StudentManagement.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

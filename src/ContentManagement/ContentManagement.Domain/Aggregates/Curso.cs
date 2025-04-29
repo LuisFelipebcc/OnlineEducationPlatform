@@ -1,6 +1,6 @@
-using ContentManagement.Domain.Entities;
 using ContentManagement.Domain.ValueObjects;
 using ContentManagement.Domain.Enums;
+using ContentManagement.Domain.Entities;
 
 namespace ContentManagement.Domain.Aggregates;
 
@@ -15,13 +15,14 @@ public class Curso
     public StatusCurso Status { get; private set; }
     public DateTime DataCriacao { get; private set; }
     public DateTime? DataAtualizacao { get; private set; }
+    public ConteudoProgramatico ConteudoProgramatico { get; private set; }
 
     private readonly List<Aula> _aulas = new();
     public IReadOnlyCollection<Aula> Aulas => _aulas.AsReadOnly();
 
     private Curso() { }
 
-    public Curso(string titulo, string descricao, decimal preco, int duracao, string nivel)
+    public Curso(string titulo, string descricao, decimal preco, int duracao, string nivel, ConteudoProgramatico conteudoProgramatico)
     {
         if (string.IsNullOrWhiteSpace(titulo))
             throw new ArgumentException("Título é obrigatório", nameof(titulo));
@@ -37,6 +38,9 @@ public class Curso
 
         if (string.IsNullOrWhiteSpace(nivel))
             throw new ArgumentException("Nível é obrigatório", nameof(nivel));
+
+        if (conteudoProgramatico == null)
+            throw new ArgumentNullException(nameof(conteudoProgramatico));
 
         Id = Guid.NewGuid();
         Titulo = titulo;
@@ -44,11 +48,12 @@ public class Curso
         Preco = preco;
         Duracao = duracao;
         Nivel = nivel;
+        ConteudoProgramatico = conteudoProgramatico;
         Status = StatusCurso.Ativo;
         DataCriacao = DateTime.UtcNow;
     }
 
-    public void Atualizar(string titulo, string descricao, decimal preco, int duracao, string nivel)
+    public void Atualizar(string titulo, string descricao, decimal preco, int duracao, string nivel, ConteudoProgramatico conteudoProgramatico)
     {
         if (string.IsNullOrWhiteSpace(titulo))
             throw new ArgumentException("Título é obrigatório", nameof(titulo));
@@ -65,11 +70,15 @@ public class Curso
         if (string.IsNullOrWhiteSpace(nivel))
             throw new ArgumentException("Nível é obrigatório", nameof(nivel));
 
+        if (conteudoProgramatico == null)
+            throw new ArgumentNullException(nameof(conteudoProgramatico));
+
         Titulo = titulo;
         Descricao = descricao;
         Preco = preco;
         Duracao = duracao;
         Nivel = nivel;
+        ConteudoProgramatico = conteudoProgramatico;
         DataAtualizacao = DateTime.UtcNow;
     }
 

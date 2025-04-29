@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OnlineEducationPlatform.API.Models;
-using OnlineEducationPlatform.API.Services;
+using OnlineEducationPlatform.API.Models.Identity;
+using OnlineEducationPlatform.API.Services.Identity;
 
 namespace OnlineEducationPlatform.API.Controllers;
 
@@ -9,39 +9,48 @@ namespace OnlineEducationPlatform.API.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
+    private readonly IIdentityService _identityService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IIdentityService identityService)
     {
-        _authService = authService;
+        _identityService = identityService;
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] AuthRequest request)
+    public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginRequest request)
     {
         try
         {
-            var response = await _authService.Authenticate(request);
+            var response = await _identityService.LoginAsync(request);
             return Ok(response);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = "Credenciais inválidas" });
+            return Unauthorized(new { message = ex.Message });
         }
     }
 
-    [HttpGet("test-auth")]
-    [Authorize]
-    public IActionResult TestAuth()
+    [HttpPost("refresh-token")]
+    [AllowAnonymous]
+    public async Task<ActionResult<TokenResponse>> RefreshToken([FromBody] string refreshToken)
     {
-        return Ok(new { message = "Autenticado com sucesso!" });
+        try
+        {
+            var response = await _identityService.RefreshTokenAsync(refreshToken);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 
-    [HttpGet("test-admin")]
-    [Authorize(Roles = "Admin")]
-    public IActionResult TestAdmin()
+    [HttpPost("validate-token")]
+    [AllowAnonymous]
+    public async Task<ActionResult<bool>> ValidateToken([FromBody] string token)
     {
-        return Ok(new { message = "Acesso de administrador confirmado!" });
+        var isValid = await _identityService.ValidateTokenAsync(token);
+        return Ok(isValid);
     }
 }
