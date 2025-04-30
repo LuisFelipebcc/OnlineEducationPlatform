@@ -8,22 +8,22 @@ namespace OnlineEducationPlatform.API.Controllers
     [Route("api/[controller]")]
     public class PaymentsController : ControllerBase
     {
-        private readonly IPagamentoService _pagamentoService;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentsController(IPagamentoService pagamentoService)
+        public PaymentsController(IPaymentService paymentService)
         {
-            _pagamentoService = pagamentoService;
+            _paymentService = paymentService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pagamento>>> GetAll()
+        public async Task<ActionResult<IEnumerable<Payment>>> GetAll()
         {
             var pagamentos = await _pagamentoService.GetAllAsync();
             return Ok(pagamentos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pagamento>> GetById(Guid id)
+        public async Task<ActionResult<Payment>> GetById(Guid id)
         {
             var pagamento = await _pagamentoService.GetByIdAsync(id);
             if (pagamento == null)
@@ -48,9 +48,9 @@ namespace OnlineEducationPlatform.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Pagamento>> Create(Pagamento pagamento)
+        public async Task<ActionResult<Payment>> Create(Payment Payment)
         {
-            var novoPagamento = await _pagamentoService.CreatePagamentoAsync(pagamento);
+            var novoPagamento = await _pagamentoService.CreatePagamentoAsync(Payment);
             return CreatedAtAction(nameof(GetById), new { id = novoPagamento.Id }, novoPagamento);
         }
 
