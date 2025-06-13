@@ -1,76 +1,78 @@
-using StudentManagement.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using StudentManagement.Application.Interfaces;
+using StudentManagement.Domain.Entities;
 using StudentManagement.Infrastructure.Data;
+using ContentManagement.Domain.Aggregates;
 
 namespace StudentManagement.Application.Services
 {
-    public class MatriculaService : IMatriculaService
+    public class EnrollmentService : IEnrollmentService
     {
         private readonly ApplicationDbContext _context;
 
-        public MatriculaService(ApplicationDbContext context)
+        public EnrollmentService(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Matricula> GetByIdAsync(Guid id)
+        public async Task<Enrollment> GetByIdAsync(Guid id)
         {
-            return await _context.Matriculas
-                .Include(m => m.Aluno)
-                .Include(m => m.Curso)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return await _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
+                .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task<IEnumerable<Matricula>> GetAllAsync()
+        public async Task<IEnumerable<Enrollment>> GetAllAsync()
         {
-            return await _context.Matriculas
-                .Include(m => m.Aluno)
-                .Include(m => m.Curso)
+            return await _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Matricula>> GetByAlunoIdAsync(int alunoId)
+        public async Task<IEnumerable<Enrollment>> GetByStudentIdAsync(Guid studentId)
         {
-            return await _context.Matriculas
-                .Include(m => m.Curso)
-                .Where(m => m.AlunoId == alunoId)
+            return await _context.Enrollments
+                .Include(e => e.Course)
+                .Where(e => e.StudentId == studentId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Matricula>> GetByCursoIdAsync(int cursoId)
+        public async Task<IEnumerable<Enrollment>> GetByCourseIdAsync(Guid courseId)
         {
-            return await _context.Matriculas
-                .Include(m => m.Aluno)
-                .Where(m => m.CursoId == cursoId)
+            return await _context.Enrollments
+                .Include(e => e.Student)
+                .Where(e => e.CourseId == courseId)
                 .ToListAsync();
         }
 
-        public async Task<Matricula> CreateMatriculaAsync(Matricula matricula)
+        public async Task<Enrollment> CreateEnrollmentAsync(Enrollment enrollment)
         {
-            if (matricula == null)
-                throw new ArgumentNullException(nameof(matricula));
+            if (enrollment == null)
+                throw new ArgumentNullException(nameof(enrollment));
 
-            matricula.DataMatricula = DateTime.Now;
-            _context.Matriculas.Add(matricula);
+            enrollment.EnrollmentDate = DateTime.UtcNow;
+            _context.Enrollments.Add(enrollment);
             await _context.SaveChangesAsync();
-            return matricula;
+            return enrollment;
         }
 
-        public async Task UpdateMatriculaAsync(Matricula matricula)
+        public async Task UpdateEnrollmentAsync(Enrollment enrollment)
         {
-            if (matricula == null)
-                throw new ArgumentNullException(nameof(matricula));
+            if (enrollment == null)
+                throw new ArgumentNullException(nameof(enrollment));
 
-            _context.Entry(matricula).State = EntityState.Modified;
+            _context.Entry(enrollment).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteMatriculaAsync(int id)
+        public async Task DeleteEnrollmentAsync(Guid id)
         {
-            var matricula = await _context.Matriculas.FindAsync(id);
-            if (matricula != null)
+            var enrollment = await _context.Enrollments.FindAsync(id);
+            if (enrollment != null)
             {
-                _context.Matriculas.Remove(matricula);
+                enrollment.Cancel();
                 await _context.SaveChangesAsync();
             }
         }

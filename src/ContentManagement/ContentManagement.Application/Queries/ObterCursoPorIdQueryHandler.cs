@@ -1,23 +1,25 @@
-using System.Threading;
-using System.Threading.Tasks;
-using ContentManagement.Domain.Entities;
-using ContentManagement.Domain.Repositories;
+using ContentManagement.Domain.Aggregates;
+using ContentManagement.Domain.Interfaces;
 using MediatR;
 
 namespace ContentManagement.Application.Queries
 {
-    public class ObterCursoPorIdQueryHandler : IRequestHandler<ObterCursoPorIdQuery, Curso>
+    public class GetCourseByIdQueryHandler : IRequestHandler<GetCourseByIdQuery, Course>
     {
-        private readonly ICursoRepository _cursoRepository;
+        private readonly ICourseRepository _courseRepository;
 
-        public ObterCursoPorIdQueryHandler(ICursoRepository cursoRepository)
+        public GetCourseByIdQueryHandler(ICourseRepository courseRepository)
         {
-            _cursoRepository = cursoRepository;
+            _courseRepository = courseRepository ?? throw new ArgumentNullException(nameof(courseRepository));
         }
 
-        public async Task<Curso> Handle(ObterCursoPorIdQuery request, CancellationToken cancellationToken)
+        public async Task<Course> Handle(GetCourseByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _cursoRepository.GetByIdAsync(request.Id);
+            var course = await _courseRepository.GetByIdAsync(request.Id);
+            if (course == null)
+                throw new InvalidOperationException($"Course with ID {request.Id} not found");
+
+            return course;
         }
     }
 }

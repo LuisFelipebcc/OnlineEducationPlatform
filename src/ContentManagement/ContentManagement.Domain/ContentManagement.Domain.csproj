@@ -7,11 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Aggregates\Administrador.cs" />
-    <Compile Remove="Aggregates\Aluno.cs" />
-    <Compile Remove="Aggregates\Matricula.cs" />
-    <Compile Remove="Aggregates\Persona.cs" />
-    <Compile Remove="Aggregates\Usuario.cs" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\Shared.Domain\Shared.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Validations\" />
   </ItemGroup>
 
 </Project>

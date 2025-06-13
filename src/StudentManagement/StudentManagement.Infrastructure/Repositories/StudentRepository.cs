@@ -27,7 +27,7 @@ public class StudentRepository : IStudentRepository
     public async Task<IEnumerable<Student>> GetActiveStudentsAsync()
     {
         return await _context.Students
-            .Where(s => s.Status == StudentStatus.Active)
+            .Where(s => !s.IsDeleted)
             .ToListAsync();
     }
 
@@ -57,7 +57,7 @@ public class StudentRepository : IStudentRepository
         if (student == null)
             return false;
 
-        _context.Students.Remove(student);
+        student.IsDeleted = true;
         await _context.SaveChangesAsync();
         return true;
     }

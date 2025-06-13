@@ -1,6 +1,6 @@
 namespace ContentManagement.Domain.Enums;
 
-public enum StatusCurso
+public enum StatusCourse
 {
     Ativo = 1,
     Inativo = 2

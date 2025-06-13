@@ -1,90 +1,113 @@
-namespace StudentManagement.Domain.Entities;
+using MediatR;
+using StudentManagement.Domain.Events;
+using Shared.Domain;
 
-public class Student
+namespace StudentManagement.Domain.Entities
 {
-    public Guid Id { get; private set; }
-    public string Nome { get; private set; }
-    public string Email { get; private set; }
-    public string CPF { get; private set; }
-    public DateTime DataNascimento { get; private set; }
-    public StudentStatus Status { get; private set; }
-    public HistoricoAprendizado HistoricoAprendizado { get; private set; }
-    private readonly List<Matricula> _matriculas;
-    public IReadOnlyCollection<Matricula> Matriculas => _matriculas.AsReadOnly();
-    private readonly List<Certificado> _certificados;
-    public IReadOnlyCollection<Certificado> Certificados => _certificados.AsReadOnly();
-
-    // Construtor protegido para o Entity Framework
-    protected Student()
+    public class Student : AggregateRoot
     {
-        _matriculas = new List<Matricula>();
-        _certificados = new List<Certificado>();
+        private readonly List<INotification> _events;
+        public IReadOnlyCollection<INotification> Events => _events.AsReadOnly();
+
+        private readonly List<Enrollment> _enrollments;
+        public IReadOnlyCollection<Enrollment> Enrollments => _enrollments.AsReadOnly();
+        private readonly List<Certificate> _certificates;
+        public IReadOnlyCollection<Certificate> Certificates => _certificates.AsReadOnly();
+        public LearningHistory LearningHistory { get; private set; }
+
+        public Guid Id { get; private set; }
+        public string Name { get; private set; }
+        public string Email { get; private set; }
+        public string CPF { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
+
+        protected Student()
+        {
+            _events = new List<INotification>();
+            _enrollments = new List<Enrollment>();
+            _certificates = new List<Certificate>();
+            Name = string.Empty;
+            Email = string.Empty;
+        }
+
+        public Student(string name, string email, string cpf)
+            : this()
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name is required", nameof(name));
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email is required", nameof(email));
+
+            Id = Guid.NewGuid();
+            Name = name;
+            Email = email;
+            CPF = cpf;
+            CreatedAt = DateTime.UtcNow;
+            LearningHistory = new LearningHistory();
+
+            AddEvent(new StudentCreatedEvent(Id, Name, Email, CreatedAt));
+        }
+
+        public void AddEnrollment(Enrollment enrollment)
+        {
+            if (enrollment == null)
+                throw new ArgumentNullException(nameof(enrollment));
+
+            if (_enrollments.Any(e => e.CourseId == enrollment.CourseId))
+                throw new InvalidOperationException("Student is already enrolled in this course");
+
+            _enrollments.Add(enrollment);
+            AddEvent(new EnrollmentCreatedEvent(Id, enrollment.CourseId, enrollment.EnrollmentDate));
+        }
+
+        public void AddCertificate(Certificate certificate)
+        {
+            if (certificate == null)
+                throw new ArgumentNullException(nameof(certificate));
+
+            if (!_enrollments.Any(e => e.CourseId == certificate.Id && e.Status == Enums.EnrollmentStatus.Completed))
+                throw new InvalidOperationException("Student has not completed the course to receive the certificate");
+
+            _certificates.Add(certificate);
+            AddEvent(new CertificateIssuedEvent(Id, certificate.Id));
+        }
+
+        public void UpdateName(string newName)
+        {
+            if (string.IsNullOrWhiteSpace(newName))
+                throw new ArgumentException("Name cannot be empty", nameof(newName));
+
+            Name = newName;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateEmail(string newEmail)
+        {
+            if (string.IsNullOrWhiteSpace(newEmail))
+                throw new ArgumentException("Email cannot be empty", nameof(newEmail));
+
+            Email = newEmail;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateLearningHistory(LearningHistory newLearningHistory)
+        {
+            if (newLearningHistory == null)
+                throw new ArgumentNullException(nameof(newLearningHistory));
+
+            LearningHistory = newLearningHistory;
+        }
+
+        protected void AddEvent(INotification @event)
+        {
+            _events.Add(@event);
+        }
+
+        public void ClearEvents()
+        {
+            _events.Clear();
+        }
     }
-
-    // Construtor público
-    public Student(string nome, string email, string cpf, DateTime dataNascimento)
-    {
-        if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
-        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email não pode ser vazio.", nameof(email));
-        if (string.IsNullOrWhiteSpace(cpf)) throw new ArgumentException("CPF não pode ser vazio.", nameof(cpf));
-        if (dataNascimento > DateTime.UtcNow) throw new ArgumentException("Data de nascimento não pode ser no futuro.", nameof(dataNascimento));
-
-        Id = Guid.NewGuid();
-        Nome = nome;
-        Email = email;
-        CPF = cpf;
-        DataNascimento = dataNascimento;
-        Status = StudentStatus.Active;
-        HistoricoAprendizado = new HistoricoAprendizado();
-        _matriculas = new List<Matricula>();
-        _certificados = new List<Certificado>();
-    }
-
-    public void AdicionarMatricula(Matricula matricula)
-    {
-        if (matricula == null)
-            throw new ArgumentNullException(nameof(matricula));
-
-        _matriculas.Add(matricula);
-    }
-
-    public void AdicionarCertificado(Certificado certificado)
-    {
-        if (certificado == null)
-            throw new ArgumentNullException(nameof(certificado));
-
-        _certificados.Add(certificado);
-    }
-
-    public void AtualizarNome(string novoNome)
-    {
-        if (string.IsNullOrWhiteSpace(novoNome))
-            throw new ArgumentException("O nome do aluno não pode ser vazio", nameof(novoNome));
-
-        Nome = novoNome;
-    }
-
-    public void AtualizarEmail(string novoEmail)
-    {
-        if (string.IsNullOrWhiteSpace(novoEmail))
-            throw new ArgumentException("O email do aluno não pode ser vazio", nameof(novoEmail));
-
-        Email = novoEmail;
-    }
-
-    public void RegistrarProgresso(Guid cursoId, int percentualConcluido)
-    {
-        HistoricoAprendizado.RegistrarProgresso(cursoId, percentualConcluido);
-    }
-
-    public void AlterarStatus(StudentStatus novoStatus)
-    {
-        Status = novoStatus;
-    }
-}
-
-public enum StudentStatus
-{
-    Active,
-    Inactive
 }

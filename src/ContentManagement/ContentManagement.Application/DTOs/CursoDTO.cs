@@ -1,33 +1,14 @@
-using ContentManagement.Domain.Enums;
-
-namespace ContentManagement.Application.DTOs;
-
-public class CursoDTO
+namespace ContentManagement.Application.DTOs
 {
-    public Guid Id { get; set; }
-    public string Titulo { get; set; }
-    public string Descricao { get; set; }
-    public decimal Preco { get; set; }
-    public int Duracao { get; set; }
-    public string Nivel { get; set; }
-    public StatusCurso Status { get; set; }
-    public DateTime DataCriacao { get; set; }
-    public DateTime? DataAtualizacao { get; set; }
-    public IEnumerable<AulaDTO> Aulas { get; set; }
-}
-
-public class AulaDTO
-{
-    public Guid Id { get; set; }
-    public string Titulo { get; set; }
-    public string Descricao { get; set; }
-    public int Ordem { get; set; }
-    public ConteudoProgramaticoDTO ConteudoProgramatico { get; set; }
-}
-
-public class ConteudoProgramaticoDTO
-{
-    public string Titulo { get; set; }
-    public string Descricao { get; set; }
-    public int Ordem { get; set; }
+    public class CursoDto
+    {
+        public Guid Id { get; set; }
+        public string Titulo { get; set; }
+        public string Descricao { get; set; }
+        public Guid InstrutorId { get; set; }
+        public DateTime DataPublicacao { get; set; }
+        public decimal Preco { get; set; }
+        public ConteudoProgramaticoDto ConteudoProgramatico { get; set; }
+        public List<AulaDto> Aulas { get; set; } = new List<AulaDto>();
+    }
 }

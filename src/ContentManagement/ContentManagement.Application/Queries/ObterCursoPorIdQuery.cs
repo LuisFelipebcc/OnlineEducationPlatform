@@ -1,10 +1,9 @@
-using System;
-using ContentManagement.Domain.Entities;
+using ContentManagement.Domain.Aggregates;
 using MediatR;
 
 namespace ContentManagement.Application.Queries
 {
-    public class ObterCursoPorIdQuery : IRequest<Curso>
+    public class GetCourseByIdQuery : IRequest<Course>
     {
         public Guid Id { get; set; }
     }

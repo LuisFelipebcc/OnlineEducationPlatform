@@ -1,22 +1,22 @@
-using ContentManagement.Domain.Entities;
+using ContentManagement.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ContentManagement.Infrastructure.Data.Configurations
 {
-    public class CursoConfiguration : IEntityTypeConfiguration<Curso>
+    public class CourseConfiguration : IEntityTypeConfiguration<Course>
     {
-        public void Configure(EntityTypeBuilder<Curso> builder)
+        public void Configure(EntityTypeBuilder<Course> builder)
         {
             builder.HasKey(c => c.Id);
 
-            builder.Property(c => c.Nome)
+            builder.Property(c => c.Name)
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.OwnsOne(c => c.ConteudoProgramatico, cp =>
+            builder.OwnsOne(c => c.CourseContent, cp =>
             {
-                cp.Property(c => c.Descricao)
+                cp.Property(c => c.Description)
                     .IsRequired()
                     .HasMaxLength(1000);
 
@@ -33,9 +33,9 @@ namespace ContentManagement.Infrastructure.Data.Configurations
                     );
             });
 
-            builder.HasMany(c => c.Aulas)
+            builder.HasMany(c => c.Lessons)
                 .WithOne()
-                .HasForeignKey(a => a.CursoId)
+                .HasForeignKey(a => a.Id)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -7,10 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\ContentManagement\ContentManagement.Application\ContentManagement.Application.csproj" />
+    <ProjectReference Include="..\..\IdentityService\IdentityService.Application\IdentityService.Application.csproj" />
+    <ProjectReference Include="..\..\PaymentBilling\PaymentBilling.Application\PaymentBilling.Application.csproj" />
     <ProjectReference Include="..\StudentManagement.Domain\StudentManagement.Domain.csproj" />
     <ProjectReference Include="..\StudentManagement.Infrastructure\StudentManagement.Infrastructure.csproj" />
   </ItemGroup>

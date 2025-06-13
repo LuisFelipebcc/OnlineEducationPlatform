@@ -1,66 +1,59 @@
-using ContentManagement.Domain.Aggregates;
-using StudentManagement.Domain.Enums;
 using System;
+using StudentManagement.Domain.ValueObjects; // Para HistoricoAprendizado
+using StudentManagement.Domain.Enums; // Adicionado
 
 namespace StudentManagement.Domain.Entities
 {
-    public class Matricula
+    public class Matricula // Poderia herdar de uma classe base Entity<Guid>
     {
         public Guid Id { get; private set; }
         public Guid AlunoId { get; private set; }
-        public Guid CursoId { get; private set; }
+        public Guid CursoId { get; private set; } // ID do curso no ContentManagement BC
         public DateTime DataMatricula { get; private set; }
-        public DateTime? DataConclusao { get; private set; }
-        public StatusMatricula Status { get; private set; }
-        public decimal? Nota { get; private set; }
-        public string? Observacoes { get; private set; }
+        public StatusMatricula Status { get; private set; } // Modificado de bool Ativa
+        public decimal PrecoPago { get; private set; } // Será definido após pagamento
+        public HistoricoAprendizado? HistoricoAprendizado { get; private set; }
 
-        // Propriedades de navegação
-        public virtual Student Aluno { get; private set; }
-        public virtual Curso Curso { get; private set; }
+        // Construtor para EF Core
+        private Matricula() { }
 
-        // Construtor protegido para o Entity Framework
-        protected Matricula() { }
-
-        // Construtor público
-        public Matricula(Guid alunoId, Guid cursoId)
+        public Matricula(Guid alunoId, Guid cursoId, decimal precoPago)
         {
             Id = Guid.NewGuid();
             AlunoId = alunoId;
             CursoId = cursoId;
             DataMatricula = DateTime.UtcNow;
-            Status = StatusMatricula.Ativo;
+            Status = StatusMatricula.PendentePagamento; // Status inicial
+            PrecoPago = precoPago; // O preço do curso, não necessariamente o pago ainda
+            HistoricoAprendizado = new HistoricoAprendizado(); // Inicia um histórico vazio
         }
 
-        public void AtualizarStatus(StatusMatricula novoStatus)
+        public void Cancelar()
         {
-            Status = novoStatus;
+            if (Status == StatusMatricula.Cancelada)
+            {
+                throw new InvalidOperationException("Matrícula já está cancelada.");
+            }
+            Status = StatusMatricula.Cancelada;
+            // Lógica adicional de cancelamento, se houver (ex: registrar data de cancelamento)
         }
 
-        public void AtualizarNota(decimal nota)
+        public void AtivarAposPagamento(decimal valorEfetivamentePago)
         {
-            if (nota < 0 || nota > 10)
-                throw new ArgumentException("A nota deve estar entre 0 e 10.", nameof(nota));
-
-            Nota = nota;
+            if (Status != StatusMatricula.PendentePagamento)
+            {
+                throw new InvalidOperationException("Matrícula só pode ser ativada se estiver pendente de pagamento.");
+            }
+            // Poderia haver uma verificação se valorEfetivamentePago corresponde ao PrecoPago esperado
+            PrecoPago = valorEfetivamentePago; // Atualiza com o valor efetivamente pago
+            Status = StatusMatricula.Ativa;
         }
 
-        public void Concluir()
+        // Métodos para atualizar progresso, etc.
+        public void RegistrarProgressoAula(Guid aulaId)
         {
-            if (Status != StatusMatricula.Ativo)
-                throw new InvalidOperationException("A matrícula deve estar ativa para ser concluída.");
-
-            DataConclusao = DateTime.UtcNow;
-            Status = StatusMatricula.Concluido;
-        }
-
-        public void Cancelar(string motivo)
-        {
-            if (Status == StatusMatricula.Concluido)
-                throw new InvalidOperationException("Não é possível cancelar uma matrícula já concluída.");
-
-            Status = StatusMatricula.Cancelado;
-            Observacoes = motivo;
+            // Garante que o HistoricoAprendizado não seja nulo e atualiza-o.
+            HistoricoAprendizado = (HistoricoAprendizado ?? new HistoricoAprendizado()).MarcarAulaConcluida(aulaId);
         }
     }
 }

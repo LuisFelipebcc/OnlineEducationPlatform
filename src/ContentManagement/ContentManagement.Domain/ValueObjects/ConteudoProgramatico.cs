@@ -1,47 +1,37 @@
-using System;
-using System.Collections.Generic;
-
-namespace ContentManagement.Domain.ValueObjects;
-
-public class ConteudoProgramatico
+namespace ContentManagement.Domain.ValueObjects
 {
-    public string Descricao { get; private set; }
-    public List<string> Objetivos { get; private set; }
-    public List<string> PreRequisitos { get; private set; }
-
-    protected ConteudoProgramatico() { }
-
-    public ConteudoProgramatico(string descricao, List<string> objetivos, List<string> preRequisitos)
+    /// <summary>
+    /// Representa o conteúdo programático de um curso.
+    /// </summary>
+    public class ConteudoProgramatico // Idealmente herdaria de uma classe base ValueObject
     {
-        if (string.IsNullOrWhiteSpace(descricao))
-            throw new ArgumentException("A descrição não pode ser vazia", nameof(descricao));
+        public IReadOnlyList<string> Topicos { get; }
+        public IReadOnlyList<string> ObjetivosAprendizagem { get; }
 
-        Descricao = descricao;
-        Objetivos = objetivos ?? new List<string>();
-        PreRequisitos = preRequisitos ?? new List<string>();
-    }
+        public ConteudoProgramatico(IEnumerable<string> topicos, IEnumerable<string> objetivosAprendizagem)
+        {
+            Topicos = topicos?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(topicos));
+            ObjetivosAprendizagem = objetivosAprendizagem?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(objetivosAprendizagem));
 
-    public void AtualizarDescricao(string novaDescricao)
-    {
-        if (string.IsNullOrWhiteSpace(novaDescricao))
-            throw new ArgumentException("A descrição não pode ser vazia", nameof(novaDescricao));
+            if (!Topicos.Any())
+                throw new ArgumentException("Conteúdo programático deve ter pelo menos um tópico.", nameof(topicos));
+        }
 
-        Descricao = novaDescricao;
-    }
+        // Para EF Core, um construtor privado sem parâmetros pode ser necessário se for um Owned Type.
+        // Ou, se não for Owned Type e for uma tabela separada, precisaria de um ID.
+        // Para simplificar, vamos assumir que será um Owned Type ou serializado.
 
-    public void AdicionarObjetivo(string objetivo)
-    {
-        if (string.IsNullOrWhiteSpace(objetivo))
-            throw new ArgumentException("O objetivo não pode ser vazio", nameof(objetivo));
+        // Value Objects devem implementar Equals e GetHashCode
+        public override bool Equals(object obj)
+        {
+            return obj is ConteudoProgramatico outro &&
+                   Topicos.SequenceEqual(outro.Topicos) &&
+                   ObjetivosAprendizagem.SequenceEqual(outro.ObjetivosAprendizagem);
+        }
 
-        Objetivos.Add(objetivo);
-    }
-
-    public void AdicionarPreRequisito(string preRequisito)
-    {
-        if (string.IsNullOrWhiteSpace(preRequisito))
-            throw new ArgumentException("O pré-requisito não pode ser vazio", nameof(preRequisito));
-
-        PreRequisitos.Add(preRequisito);
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Topicos, ObjetivosAprendizagem);
+        }
     }
 }

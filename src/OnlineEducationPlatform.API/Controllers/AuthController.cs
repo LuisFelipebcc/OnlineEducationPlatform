@@ -1,56 +1,42 @@
-using Microsoft.AspNetCore.Authorization;
+using IdentityService.Application.DTOs;
+using IdentityService.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using OnlineEducationPlatform.API.Models.Identity;
-using OnlineEducationPlatform.API.Services.Identity;
 
-namespace OnlineEducationPlatform.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace OnlineEducationPlatform.API.Controllers
 {
-    private readonly IIdentityService _identityService;
-
-    public AuthController(IIdentityService identityService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
-        _identityService = identityService;
-    }
+        private readonly IAuthenticationService _authenticationService;
 
-    [HttpPost("login")]
-    [AllowAnonymous]
-    public async Task<ActionResult<TokenResponse>> Login([FromBody] LoginRequest request)
-    {
-        try
+        public AuthController(IAuthenticationService authenticationService)
         {
-            var response = await _identityService.LoginAsync(request);
-            return Ok(response);
+            _authenticationService = authenticationService;
         }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { message = ex.Message });
-        }
-    }
 
-    [HttpPost("refresh-token")]
-    [AllowAnonymous]
-    public async Task<ActionResult<TokenResponse>> RefreshToken([FromBody] string refreshToken)
-    {
-        try
+        [HttpPost("registrar")]
+        public async Task<IActionResult> Registrar([FromBody] RegistrarUsuarioDto registrarUsuarioDto)
         {
-            var response = await _identityService.RefreshTokenAsync(refreshToken);
-            return Ok(response);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { message = ex.Message });
-        }
-    }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-    [HttpPost("validate-token")]
-    [AllowAnonymous]
-    public async Task<ActionResult<bool>> ValidateToken([FromBody] string token)
-    {
-        var isValid = await _identityService.ValidateTokenAsync(token);
-        return Ok(isValid);
+            var resultado = await _authenticationService.RegistrarAsync(registrarUsuarioDto);
+            return resultado != null ? Ok(resultado) : BadRequest("Falha ao registrar usuário. O email pode já estar em uso ou o tipo de persona é inválido.");
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var resultado = await _authenticationService.LoginAsync(loginDto);
+            return resultado != null ? Ok(resultado) : Unauthorized("Email ou senha inválidos.");
+        }
     }
 }

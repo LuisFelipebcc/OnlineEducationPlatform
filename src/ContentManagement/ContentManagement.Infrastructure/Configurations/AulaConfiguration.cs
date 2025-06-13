@@ -8,7 +8,7 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
 {
     public void Configure(EntityTypeBuilder<Aula> builder)
     {
-        builder.ToTable("Aulas");
+        builder.ToTable("Aula");
 
         builder.HasKey(a => a.Id);
 
@@ -20,7 +20,11 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
             .IsRequired()
             .HasMaxLength(1000);
 
-        builder.Property(a => a.Conteudo)
+        builder.Property(a => a.Content)
+            .IsRequired()
+            .HasMaxLength(4000);
+
+        builder.Property(a => a.DuracaoEmMinutos)
             .IsRequired();
 
         builder.Property(a => a.Ordem)
@@ -29,21 +33,20 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
         builder.Property(a => a.CursoId)
             .IsRequired();
 
-        builder.Property(a => a.DataCriacao)
-            .IsRequired();
+        builder.HasOne<Aula>()
+            .WithMany(c => c.Aulas)
+            .HasForeignKey(a => a.CursoId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsOne(a => a.ConteudoProgramatico, cp =>
-        {
-            cp.Property(c => c.Titulo)
-                .IsRequired()
-                .HasMaxLength(200);
+        builder.HasIndex(a => a.Id);
+        builder.HasIndex(a => a.Ordem);
+        builder.HasIndex(a => a.CursoId);
+        builder.HasIndex(a => new { a.CourseId, a.Order }).IsUnique();
 
-            cp.Property(c => c.Descricao)
-                .IsRequired()
-                .HasMaxLength(1000);
+        builder.Property<bool>("IsDeleted")
+            .IsRequired()
+            .HasDefaultValue(false);
 
-            cp.Property(c => c.Ordem)
-                .IsRequired();
-        });
+        builder.HasQueryFilter(a => EF.Property<bool>(a, "IsDeleted") == false);
     }
 }
