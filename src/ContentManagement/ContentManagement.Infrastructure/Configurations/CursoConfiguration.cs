@@ -1,99 +1,61 @@
-using ContentManagement.Domain.Aggregates;
+using ContentManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ContentManagement.Infrastructure.Configurations;
 
-public class CourseConfiguration : IEntityTypeConfiguration<Course>
+public class CursoConfiguration : IEntityTypeConfiguration<Curso>
 {
-    public void Configure(EntityTypeBuilder<Course> builder)
+    public void Configure(EntityTypeBuilder<Curso> builder)
     {
-        builder.ToTable("Courses");
+        builder.ToTable("Cursos");
 
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Title)
+        builder.Property(c => c.Titulo)
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(c => c.Description)
+        builder.Property(c => c.Descricao)
             .IsRequired()
             .HasMaxLength(1000);
 
-        builder.Property(c => c.Price)
+        builder.Property(c => c.InstrutorId)
+            .IsRequired();
+
+        builder.Property(c => c.DataPublicacao)
+            .IsRequired();
+
+        builder.Property(c => c.Preco)
             .HasPrecision(18, 2)
             .IsRequired();
 
-        builder.Property(c => c.Duration)
-            .IsRequired();
-
-        builder.Property(c => c.Level)
-            .IsRequired()
-            .HasMaxLength(50);
-
-        builder.Property(c => c.Status)
-            .IsRequired();
-
-        builder.Property(c => c.ImageUrl)
-            .IsRequired()
-            .HasMaxLength(500);
-
-        builder.Property(c => c.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
-
-        builder.Property(c => c.UpdatedAt)
-            .IsRequired(false);
-
-        builder.OwnsOne(c => c.CourseContent, cp =>
+        builder.OwnsOne(c => c.ConteudoProgramatico, cp =>
         {
-            cp.Property(p => p.Introduction)
-                .IsRequired()
-                .HasMaxLength(2000);
+            cp.Property(p => p.Topicos)
+                .HasConversion(
+                    v => string.Join(";", v),
+                    v => v.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                .HasColumnName("Topicos")
+                .IsRequired();
 
-            cp.Property(p => p.Objectives)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            cp.Property(p => p.Prerequisites)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            cp.Property(p => p.TargetAudience)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            cp.Property(p => p.Methodology)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            cp.Property(p => p.Evaluation)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            cp.Property(p => p.Certification)
-                .IsRequired()
-                .HasMaxLength(2000);
-
-            cp.Property(p => p.References)
-                .IsRequired()
-                .HasMaxLength(2000);
+            cp.Property(p => p.ObjetivosAprendizagem)
+                .HasConversion(
+                    v => string.Join(";", v),
+                    v => v.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                .HasColumnName("ObjetivosAprendizagem")
+                .IsRequired();
         });
 
-        builder.HasMany(c => c.Lessons)
+        builder.Ignore(c => c.Aulas);
+
+        builder.HasMany<Aula>("_aulas")
             .WithOne()
-            .HasForeignKey(l => l.CourseId)
+            .HasForeignKey(a => a.CursoId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(c => c.Title);
-        builder.HasIndex(c => c.Status);
-        builder.HasIndex(c => c.CreatedAt);
-        builder.HasIndex(c => new { c.Title, c.Status }).IsUnique();
-
-        builder.Property<bool>("IsDeleted")
-            .IsRequired()
-            .HasDefaultValue(false);
-
-        builder.HasQueryFilter(c => EF.Property<bool>(c, "IsDeleted") == false);
+        builder.HasIndex(c => c.Titulo);
+        builder.HasIndex(c => c.InstrutorId);
+        builder.HasIndex(c => c.DataPublicacao);
     }
 }

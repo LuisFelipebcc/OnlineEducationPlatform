@@ -9,6 +9,6 @@ namespace ContentManagement.Application.DTOs
         public DateTime DataPublicacao { get; set; }
         public decimal Preco { get; set; }
         public ConteudoProgramaticoDto ConteudoProgramatico { get; set; }
-        public List<AulaDto> Aulas { get; set; } = new List<AulaDto>();
+        public List<AulaDto> Aulas { get; set; } = new();
     }
 }

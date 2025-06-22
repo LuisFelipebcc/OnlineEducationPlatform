@@ -2,77 +2,70 @@ using Microsoft.EntityFrameworkCore;
 using StudentManagement.Application.Interfaces;
 using StudentManagement.Domain.Entities;
 using StudentManagement.Infrastructure.Data;
-using ContentManagement.Domain.Aggregates;
 
 namespace StudentManagement.Application.Services
 {
-    public class EnrollmentService : IEnrollmentService
+    public class MatriculaService : IMatriculaService
     {
         private readonly ApplicationDbContext _context;
 
-        public EnrollmentService(ApplicationDbContext context)
+        public MatriculaService(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Enrollment> GetByIdAsync(Guid id)
+        public async Task<Matricula> ObterPorIdAsync(Guid id)
         {
-            return await _context.Enrollments
-                .Include(e => e.Student)
-                .Include(e => e.Course)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            return await _context.Matriculas
+                .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<IEnumerable<Enrollment>> GetAllAsync()
+        public async Task<IEnumerable<Matricula>> ObterTodasAsync()
         {
-            return await _context.Enrollments
-                .Include(e => e.Student)
-                .Include(e => e.Course)
+            return await _context.Matriculas
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Enrollment>> GetByStudentIdAsync(Guid studentId)
+        public async Task<IEnumerable<Matricula>> ObterPorAlunoIdAsync(Guid alunoId)
         {
-            return await _context.Enrollments
-                .Include(e => e.Course)
-                .Where(e => e.StudentId == studentId)
+            return await _context.Matriculas
+                .Where(m => m.AlunoId == alunoId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Enrollment>> GetByCourseIdAsync(Guid courseId)
+        public async Task<IEnumerable<Matricula>> ObterPorCursoIdAsync(Guid cursoId)
         {
-            return await _context.Enrollments
-                .Include(e => e.Student)
-                .Where(e => e.CourseId == courseId)
+            return await _context.Matriculas
+                .Where(m => m.CursoId == cursoId)
                 .ToListAsync();
         }
 
-        public async Task<Enrollment> CreateEnrollmentAsync(Enrollment enrollment)
+        public async Task<Matricula> CriarMatriculaAsync(Matricula matricula)
         {
-            if (enrollment == null)
-                throw new ArgumentNullException(nameof(enrollment));
+            if (matricula == null)
+                throw new ArgumentNullException(nameof(matricula));
 
-            enrollment.EnrollmentDate = DateTime.UtcNow;
-            _context.Enrollments.Add(enrollment);
+            _context.Matriculas.Add(matricula);
             await _context.SaveChangesAsync();
-            return enrollment;
+            return matricula;
         }
 
-        public async Task UpdateEnrollmentAsync(Enrollment enrollment)
+        public async Task AtualizarMatriculaAsync(Matricula matricula)
         {
-            if (enrollment == null)
-                throw new ArgumentNullException(nameof(enrollment));
+            if (matricula == null)
+                throw new ArgumentNullException(nameof(matricula));
 
-            _context.Entry(enrollment).State = EntityState.Modified;
+            // Se a entidade já está sendo rastreada, basta alterar e salvar.
+            _context.Entry(matricula).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteEnrollmentAsync(Guid id)
+        public async Task RemoverMatriculaAsync(Guid id)
         {
-            var enrollment = await _context.Enrollments.FindAsync(id);
-            if (enrollment != null)
+            var matricula = await _context.Matriculas.FindAsync(id);
+            if (matricula != null)
             {
-                enrollment.Cancel();
+                matricula.Cancelar(); // Soft delete/cancelamento lógico
                 await _context.SaveChangesAsync();
             }
         }

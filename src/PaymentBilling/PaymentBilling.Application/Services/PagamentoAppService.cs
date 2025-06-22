@@ -1,95 +1,89 @@
 using MediatR;
-using Microsoft.Extensions.Logging; // Adicionado para Logger
-using PaymentBilling.Application.DTOs; // Adicionado para DTOs
+using Microsoft.Extensions.Logging;
+using PaymentBilling.Application.DTOs;
 using PaymentBilling.Domain.Entities;
 using PaymentBilling.Domain.Repositories;
-using PaymentBilling.Domain.ValueObjects;
 using PaymentBilling.Application.Events;
 using PaymentBilling.Application.Interfaces;
-using PaymentBilling.Infrastructure.Persistence; // Adicionado
+using PaymentBilling.Infrastructure.Persistence;
 
 namespace PaymentBilling.Application.Services
 {
-    // Renomeado de PaymentService para PagamentoAppService e IPaymentService para IPagamentoAppService
     public class PagamentoAppService : IPagamentoAppService
     {
         private readonly IPagamentoRepository _pagamentoRepository;
         private readonly IMediator _mediator;
-        private readonly ILogger<PagamentoAppService> _logger; // Adicionado Logger
-        private readonly PaymentBillingDbContext _dbContext; // Adicionado DbContext
+        private readonly ILogger<PagamentoAppService> _logger;
+        private readonly PaymentBillingDbContext _dbContext;
 
-        public PagamentoAppService( // Construtor corrigido para o nome da classe
+        public PagamentoAppService(
             IPagamentoRepository pagamentoRepository,
             IMediator mediator,
-            ILogger<PagamentoAppService> logger, // Adicionado Logger
-            PaymentBilling.Infrastructure.Persistence.PaymentBillingDbContext dbContext) // Adicionado DbContext
+            ILogger<PagamentoAppService> logger,
+            PaymentBillingDbContext dbContext)
         {
             _pagamentoRepository = pagamentoRepository ?? throw new ArgumentNullException(nameof(pagamentoRepository));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger)); // Adicionado Logger
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext)); // Adicionado DbContext
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        // Método ajustado para usar CriarPagamentoDto
         public async Task<PagamentoDto?> ProcessarPagamentoAsync(CriarPagamentoDto criarPagamentoDto)
         {
-            DadosCartao? dadosCartaoDominio = null;
-            if (criarPagamentoDto.DadosCartao != null)
-            {
-                // ATENÇÃO: Em um sistema real, os dados do cartão não seriam passados assim.
-                // Eles seriam tokenizados por um gateway de pagamento.
-                // Esta é uma simplificação extrema.
-                dadosCartaoDominio = new DadosCartao(
-                    criarPagamentoDto.DadosCartao.NumeroCartao,
-                    criarPagamentoDto.DadosCartao.NomeTitular,
-                    criarPagamentoDto.DadosCartao.DataValidade);
-            }
-
-            var pagamento = new Pagamento( // Usando a entidade Pagamento
+            // Criação do pagamento sem dados sensíveis, apenas com o token
+            var pagamento = new Pagamento(
                 criarPagamentoDto.AlunoId,
                 criarPagamentoDto.ReferenciaPedidoId,
                 criarPagamentoDto.Valor,
-                dadosCartaoDominio);
+                null // DadosCartao não é mais usado diretamente
+            );
 
             await _pagamentoRepository.AddAsync(pagamento);
 
-            // Simulação da interação com um Gateway de Pagamento
             pagamento.MarcarComoProcessando();
-            await _dbContext.SaveChangesAsync(); // Salva o estado "Processando"
+            await _dbContext.SaveChangesAsync();
 
-            bool pagamentoAprovadoPeloGateway = SimularProcessamentoGateway(pagamento, criarPagamentoDto.DadosCartao);
+            bool pagamentoAprovadoPeloGateway = SimularProcessamentoGateway(criarPagamentoDto.PaymentMethodToken);
 
             if (pagamentoAprovadoPeloGateway)
             {
                 pagamento.Aprovar($"GATEWAY_TXN_{Guid.NewGuid().ToString().Substring(0, 8)}");
                 _logger.LogInformation("Pagamento {PagamentoId} aprovado.", pagamento.Id);
+
+                // Se o gateway retornar dados mascarados, use:
+                // pagamento.AtualizarDetalhesCartaoGateway("****1234", "Nome Titular", "12/25");
             }
             else
             {
-                pagamento.Rejeitar("Falha na autorização do cartão ou regra de negócio do gateway.");
+                pagamento.Rejeitar("Falha na autorização do método de pagamento.");
                 _logger.LogWarning("Pagamento {PagamentoId} rejeitado.", pagamento.Id);
             }
 
-            await _dbContext.SaveChangesAsync(); // Salva o estado final
+            await _dbContext.SaveChangesAsync();
 
-            // Publicar evento com o resultado do processamento
-            await _mediator.Publish(new PagamentoProcessadoEvent(pagamento.Id, pagamento.AlunoId, pagamento.ReferenciaPedidoId, pagamento.Valor, pagamento.Status));
+            await _mediator.Publish(new PagamentoProcessadoEvent(
+                pagamento.Id,
+                pagamento.AlunoId,
+                pagamento.ReferenciaPedidoId,
+                pagamento.Valor,
+                pagamento.Status
+            ));
 
             return MapToPagamentoDto(pagamento);
         }
 
-        // Simulação do Gateway
-        private bool SimularProcessamentoGateway(Pagamento pagamento, DadosCartaoDto? dadosCartaoDto)
+        // Simulação do Gateway usando apenas o token
+        private bool SimularProcessamentoGateway(string paymentMethodToken)
         {
-            _logger.LogInformation("Simulando processamento do pagamento {PagamentoId} no gateway.", pagamento.Id);
+            _logger.LogInformation("Simulando processamento do pagamento com token {Token}.", paymentMethodToken);
             Task.Delay(1000).Wait();
-            if (dadosCartaoDto == null) return false;
-            return !dadosCartaoDto.NumeroCartao.EndsWith("0000");
+            // Simulação: tokens terminados em "0" são rejeitados
+            return !paymentMethodToken.EndsWith("0");
         }
 
         public async Task<PagamentoDto?> GetPagamentoByIdAsync(Guid id)
         {
-            var pagamento = await _pagamentoRepository.GetByIdAsync(id); // Usando o método correto do repositório
+            var pagamento = await _pagamentoRepository.GetByIdAsync(id);
             return pagamento == null ? null : MapToPagamentoDto(pagamento);
         }
 
@@ -99,26 +93,18 @@ namespace PaymentBilling.Application.Services
             return pagamentos.Select(MapToPagamentoDto);
         }
 
-        // Métodos como Confirmar, Rejeitar, Cancelar seriam chamados por outros processos
-        // (ex: um webhook do gateway de pagamento ou uma ação administrativa)
-        // e não diretamente expostos da mesma forma que ProcessarPagamentoAsync.
-        // Eles modificariam o estado de um pagamento existente.
-
-        // Exemplo de como um método de confirmação poderia ser (chamado internamente ou por um handler de evento do gateway):
         public async Task<PagamentoDto?> ConfirmarPagamentoInternoAsync(Guid pagamentoId, string codigoTransacaoGateway)
         {
             var pagamento = await _pagamentoRepository.GetByIdAsync(pagamentoId);
             if (pagamento == null)
                 throw new InvalidOperationException("Pagamento não encontrado");
 
-            pagamento.Aprovar(codigoTransacaoGateway); // Método da entidade de domínio
+            pagamento.Aprovar(codigoTransacaoGateway);
             await _pagamentoRepository.UpdateAsync(pagamento);
             await _dbContext.SaveChangesAsync();
-            // Publicar evento PagamentoAprovadoEvent
-            // await _mediator.Publish(new PagamentoAprovadoEvent(pagamento.Id, ...));
+            // Publicar evento PagamentoAprovadoEvent se necessário
             return MapToPagamentoDto(pagamento);
         }
-
 
         private PagamentoDto MapToPagamentoDto(Pagamento pagamento) => new PagamentoDto
         {
@@ -133,42 +119,5 @@ namespace PaymentBilling.Application.Services
             GatewayPagamentoId = pagamento.GatewayPagamentoId,
             MensagemErro = pagamento.MensagemErro
         };
-
-        // Os métodos abaixo foram removidos pois a lógica de alteração de estado
-        // deve ser encapsulada na entidade de domínio e chamada conforme necessário,
-        // possivelmente por handlers de eventos ou outros serviços, não diretamente
-        // como ações primárias do AppService da mesma forma que ProcessarPagamento.
-        /*
-        public async Task<Payment> RejeitarPagamentoAsync(Guid paymentId, string mensagemErro)
-        {
-            var payment = await _pagamentoRepository.GetByIdAsync(paymentId);
-            if (payment == null)
-                throw new InvalidOperationException("Pagamento não encontrado");
-
-            payment.Rejeitar(mensagemErro);
-            await _pagamentoRepository.UpdateAsync(payment);
-
-            foreach (var evento in payment.Eventos) // Supondo que a entidade Pagamento tenha uma coleção Eventos
-            {
-                await _mediator.Publish(evento);
-            }
-            return payment;
-        }
-        public async Task<Payment> CancelarPagamentoAsync(Guid paymentId)
-        {
-            var payment = await _pagamentoRepository.GetByIdAsync(paymentId);
-            if (payment == null)
-                throw new InvalidOperationException("Pagamento não encontrado");
-
-            payment.Cancelar();
-            await _pagamentoRepository.UpdateAsync(payment);
-
-            foreach (var evento in payment.Eventos) // Supondo que a entidade Pagamento tenha uma coleção Eventos
-            {
-                await _mediator.Publish(evento);
-            }
-            return payment;
-        }
-        */
     }
 }

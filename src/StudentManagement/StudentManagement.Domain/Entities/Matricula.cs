@@ -9,7 +9,7 @@ namespace StudentManagement.Domain.Entities
         public Guid Id { get; private set; }
         public Guid AlunoId { get; private set; }
         public Guid CursoId { get; private set; } // ID do curso no ContentManagement BC
-        public DateTime DataMatricula { get; private set; }
+        public DateTime DataMatricula { get; set; }
         public StatusMatricula Status { get; private set; } // Modificado de bool Ativa
         public decimal PrecoPago { get; private set; } // Será definido após pagamento
         public HistoricoAprendizado? HistoricoAprendizado { get; private set; }

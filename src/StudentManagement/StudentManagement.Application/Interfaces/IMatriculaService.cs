@@ -2,14 +2,14 @@ using StudentManagement.Domain.Entities;
 
 namespace StudentManagement.Application.Interfaces
 {
-    public interface IEnrollmentService
+    public interface IMatriculaService
     {
-        Task<Enrollment> GetByIdAsync(Guid id);
-        Task<IEnumerable<Enrollment>> GetAllAsync();
-        Task<IEnumerable<Enrollment>> GetByStudentIdAsync(Guid studentId);
-        Task<IEnumerable<Enrollment>> GetByCourseIdAsync(Guid courseId);
-        Task<Enrollment> CreateEnrollmentAsync(Enrollment enrollment);
-        Task UpdateEnrollmentAsync(Enrollment enrollment);
-        Task DeleteEnrollmentAsync(Guid id);
+        Task<Matricula> ObterPorIdAsync(Guid id);
+        Task<IEnumerable<Matricula>> ObterTodasAsync();
+        Task<IEnumerable<Matricula>> ObterPorAlunoIdAsync(Guid alunoId);
+        Task<IEnumerable<Matricula>> ObterPorCursoIdAsync(Guid cursoId);
+        Task<Matricula> CriarMatriculaAsync(Matricula matricula);
+        Task AtualizarMatriculaAsync(Matricula matricula);
+        Task RemoverMatriculaAsync(Guid id);
     }
 }

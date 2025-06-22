@@ -1,4 +1,3 @@
-using ContentManagement.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Domain.Entities;
 
@@ -11,46 +10,50 @@ namespace StudentManagement.Infrastructure.Data
         {
         }
 
-        public DbSet<Student> Students { get; set; }
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Enrollment> Enrollments { get; set; }
+        public DbSet<Aluno> Alunos { get; set; }
+        public DbSet<Matricula> Matriculas { get; set; }
+        public DbSet<Certificado> Certificados { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Course>(entity =>
+            // Configuração de Aluno
+            modelBuilder.Entity<Aluno>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Title).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Description).IsRequired();
-                entity.Property(e => e.Price).HasPrecision(10, 2);
-                entity.Property(e => e.Level).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.NomeCompleto).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
 
-                entity.OwnsOne(e => e.CourseContent, courseContent =>
-                {
-                    courseContent.Property(c => c.Introduction).IsRequired();
-                    courseContent.Property(c => c.Objectives).IsRequired();
-                    courseContent.Property(c => c.Prerequisites).IsRequired();
-                    courseContent.Property(c => c.TargetAudience).IsRequired();
-                    courseContent.Property(c => c.Methodology).IsRequired();
-                    courseContent.Property(c => c.Evaluation).IsRequired();
-                    courseContent.Property(c => c.Certification).IsRequired();
-                    courseContent.Property(c => c.References).IsRequired();
-                });
+                entity.HasMany(e => e.Matriculas)
+                      .WithOne()
+                      .HasForeignKey(m => m.AlunoId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(e => e.Certificados)
+                      .WithOne()
+                      .HasForeignKey(c => c.AlunoId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Enrollment>()
-                .HasOne(e => e.Student)
-                .WithMany()
-                .HasForeignKey(e => e.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Configuração de Matricula
+            modelBuilder.Entity<Matricula>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CursoId).IsRequired();
+                entity.Property(e => e.DataMatricula).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.PrecoPago).HasPrecision(18, 2).IsRequired();
+            });
 
-            modelBuilder.Entity<Enrollment>()
-                .HasOne(e => e.Course)
-                .WithMany()
-                .HasForeignKey(e => e.CourseId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Configuração de Certificado
+            modelBuilder.Entity<Certificado>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CursoId).IsRequired();
+                entity.Property(e => e.NomeCurso).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.DataEmissao).IsRequired();
+            });
         }
     }
 }

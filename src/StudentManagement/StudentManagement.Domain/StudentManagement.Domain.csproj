@@ -14,4 +14,8 @@
     <ProjectReference Include="..\..\ContentManagement\ContentManagement.Domain\ContentManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
 </Project>

@@ -9,78 +9,84 @@ public static class ContentManagementDbSeeder
 {
     public static async Task SeedAsync(ContentManagementDbContext context)
     {
-        // Garante que as migrações pendentes sejam aplicadas antes de semear.
-        // Opcional: pode ser feito em outro lugar, como no Program.cs.
-        // if ((await context.Database.GetPendingMigrationsAsync()).Any())
-        // {
-        //     await context.Database.MigrateAsync();
-        // }
+        await context.Database.MigrateAsync();
 
-        if (!await context.Cursos.AnyAsync()) // Assumindo que o DbSet se chama 'Cursos'
+        if (!await context.Cursos.AnyAsync())
         {
             var cursosASemear = new List<Curso>();
 
+            // Exemplo de InstrutorId fixo (em produção, gere dinamicamente ou relacione com usuário real)
+            var instrutorId = Guid.NewGuid();
+
             // Curso 1: Introdução ao C#
+            var conteudoCSharp = new ConteudoProgramatico(
+                new List<string> { "Variáveis e Tipos", "Estruturas de Controle" },
+                new List<string> { "Compreender tipos de dados", "Utilizar estruturas condicionais" }
+            );
             var cursoCSharp = new Curso(
                 "Introdução ao C#",
                 "Curso introdutório sobre a linguagem C# e o ecossistema .NET.",
-                99.99m
+                instrutorId,
+                99.99m,
+                conteudoCSharp
             );
-
-            cursoCSharp.AddAula( // Supondo que o método seja AddAula
+            cursoCSharp.AdicionarAula(
                 "Visão Geral do C# e .NET",
                 "Primeira aula: O que é C#, .NET Platform, CLR, CTS, CLS.",
-                "Conteúdo detalhado sobre a introdução ao C# e .NET, configuração do ambiente de desenvolvimento (Visual Studio, VS Code), e primeiro programa \"Olá, Mundo!\".",
-                1,
-                new ConteudoProgramatico("Variáveis e Tipos", "Aprenda sobre variáveis e tipos de dados em C#", 1)
+                45,
+                "https://videos.plataforma.com/csharp-intro"
             );
-
-            cursoCSharp.AddAula(
+            cursoCSharp.AdicionarAula(
                 "Estruturas de Controle",
                 "Segunda aula: if/else, switch, loops (for, while, do-while).",
-                "Conteúdo detalhado sobre como controlar o fluxo de execução do programa utilizando estruturas condicionais e de repetição.",
-                2,
-                new ConteudoProgramatico("If, Else e Switch", "Aprenda sobre estruturas de controle em C#", 2)
+                60,
+                "https://videos.plataforma.com/csharp-controle"
             );
             cursosASemear.Add(cursoCSharp);
 
             // Curso 2: Desenvolvimento Web com ASP.NET Core
+            var conteudoAspNet = new ConteudoProgramatico(
+                new List<string> { "Primeiros Passos", "MVC Essencial" },
+                new List<string> { "Configurar projeto ASP.NET Core", "Entender arquitetura MVC" }
+            );
             var cursoAspNetCore = new Curso(
                 "Desenvolvimento Web com ASP.NET Core",
                 "Aprenda a construir aplicações web modernas com ASP.NET Core MVC e Razor Pages.",
-                149.50m
+                instrutorId,
+                149.50m,
+                conteudoAspNet
             );
-
-            cursoAspNetCore.AddAula(
+            cursoAspNetCore.AdicionarAula(
                 "Introdução ao ASP.NET Core",
                 "O que é ASP.NET Core, arquitetura MVC, middleware.",
-                "Conteúdo sobre os fundamentos do ASP.NET Core, ciclo de vida da requisição e configuração de um projeto MVC.",
-                1,
-                new ConteudoProgramatico("Primeiros Passos", "Configuração e conceitos iniciais do ASP.NET Core.", 1)
+                50,
+                "https://videos.plataforma.com/aspnet-intro"
             );
-
-            cursoAspNetCore.AddAula(
+            cursoAspNetCore.AdicionarAula(
                 "Controllers e Actions",
                 "Como funcionam os Controllers, Actions, Views e Model Binding.",
-                "Conteúdo prático sobre a criação de controllers para lidar com requisições HTTP e retornar views ou dados.",
-                2,
-                new ConteudoProgramatico("MVC Essencial", "Componentes chave do padrão MVC em ASP.NET Core.", 1)
+                70,
+                "https://videos.plataforma.com/aspnet-controllers"
             );
             cursosASemear.Add(cursoAspNetCore);
 
             // Curso 3: Programação Orientada a Objetos com C#
+            var conteudoPOO = new ConteudoProgramatico(
+                new List<string> { "Introdução à POO" },
+                new List<string> { "Entender o paradigma orientado a objetos" }
+            );
             var cursoPOO = new Curso(
                 "Programação Orientada a Objetos com C#",
                 "Domine os conceitos de POO: Classes, Objetos, Herança, Polimorfismo e Encapsulamento.",
-                120.00m
+                instrutorId,
+                120.00m,
+                conteudoPOO
             );
-
-            cursoPOO.AddAula(
+            cursoPOO.AdicionarAula(
                 "Conceitos Fundamentais de POO",
                 "O que são classes, objetos, abstração, encapsulamento.",
-                "Explicação detalhada dos pilares da Programação Orientada a Objetos e como aplicá-los em C#.",
-                1,
-                new ConteudoProgramatico("Introdução à POO", "Entendendo o paradigma orientado a objetos.", 1)
+                55,
+                "https://videos.plataforma.com/poo-fundamentos"
             );
             cursosASemear.Add(cursoPOO);
 

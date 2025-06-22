@@ -8,7 +8,7 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
 {
     public void Configure(EntityTypeBuilder<Aula> builder)
     {
-        builder.ToTable("Aula");
+        builder.ToTable("Aulas");
 
         builder.HasKey(a => a.Id);
 
@@ -20,9 +20,9 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
             .IsRequired()
             .HasMaxLength(1000);
 
-        builder.Property(a => a.Content)
+        builder.Property(a => a.UrlVideo)
             .IsRequired()
-            .HasMaxLength(4000);
+            .HasMaxLength(500);
 
         builder.Property(a => a.DuracaoEmMinutos)
             .IsRequired();
@@ -33,7 +33,8 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
         builder.Property(a => a.CursoId)
             .IsRequired();
 
-        builder.HasOne<Aula>()
+        // Relacionamento: Aula pertence a um Curso
+        builder.HasOne<Curso>()
             .WithMany(c => c.Aulas)
             .HasForeignKey(a => a.CursoId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -41,7 +42,7 @@ public class AulaConfiguration : IEntityTypeConfiguration<Aula>
         builder.HasIndex(a => a.Id);
         builder.HasIndex(a => a.Ordem);
         builder.HasIndex(a => a.CursoId);
-        builder.HasIndex(a => new { a.CourseId, a.Order }).IsUnique();
+        builder.HasIndex(a => new { a.CursoId, a.Ordem }).IsUnique();
 
         builder.Property<bool>("IsDeleted")
             .IsRequired()

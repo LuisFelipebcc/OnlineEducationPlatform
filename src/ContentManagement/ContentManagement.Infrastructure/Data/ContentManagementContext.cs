@@ -1,4 +1,4 @@
-using ContentManagement.Domain.Aggregates;
+using ContentManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContentManagement.Infrastructure.Data
@@ -10,8 +10,8 @@ namespace ContentManagement.Infrastructure.Data
         {
         }
 
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Curso> Cursos { get; set; }
+        public DbSet<Aula> Aulas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

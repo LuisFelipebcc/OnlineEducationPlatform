@@ -1,6 +1,4 @@
 using IdentityService.Domain.Entities;
-using System;
-using System.Threading.Tasks;
 
 namespace IdentityService.Domain.Repositories
 {

@@ -1,6 +1,5 @@
 using ContentManagement.Application.Commands;
-using ContentManagement.Application.Commands.Handlers;
-using ContentManagement.Domain.Interfaces;
+using ContentManagement.Domain.Repositories;
 using ContentManagement.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +10,8 @@ public static class CursoMapping
 {
     public static IServiceCollection AddCursoMappings(this IServiceCollection services)
     {
-        services.AddScoped<IRequestHandler<CreateCourseCommand, Guid>, CreateCourseCommandHandler>();
-        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IRequestHandler<CriarCursoCommand, Guid>, CriarCursoCommandHandler>();
+        services.AddScoped<ICursoRepository, CursoRepository>();
         return services;
     }
 }
