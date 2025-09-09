@@ -54,8 +54,8 @@ namespace StudentManagement.Infrastructure.Persistence
                 {
                     haBuilder.Property(ha => ha.ProgressoAulas)
                         .HasConversion(
-                            d => JsonSerializer.Serialize(d, (JsonSerializerOptions?)null),
-                            s => JsonSerializer.Deserialize<Dictionary<Guid, DateTime?>>(s, (JsonSerializerOptions?)null) ?? new Dictionary<Guid, DateTime?>()
+                            d => JsonSerializer.Serialize(d, (JsonSerializerOptions)null),
+                            s => JsonSerializer.Deserialize<Dictionary<Guid, DateTime?>>(s, (JsonSerializerOptions)null) ?? new Dictionary<Guid, DateTime?>()
                         )
                         .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<IReadOnlyDictionary<Guid, DateTime?>>(
                             (c1, c2) => c1!.SequenceEqual(c2!),

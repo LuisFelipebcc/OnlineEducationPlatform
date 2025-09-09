@@ -49,7 +49,7 @@ namespace PaymentBilling.Domain.ValueObjects
                    ValidateSecurityCode(SecurityCode);
         }
 
-        private bool ValidateCardNumber(string cardNumber)
+        private static bool ValidateCardNumber(string cardNumber)
         {
             if (string.IsNullOrWhiteSpace(cardNumber))
                 return false;
@@ -68,7 +68,7 @@ namespace PaymentBilling.Domain.ValueObjects
             return true;
         }
 
-        private bool ValidateExpirationDate(string expirationDate)
+        private static bool ValidateExpirationDate(string expirationDate)
         {
             if (string.IsNullOrWhiteSpace(expirationDate))
                 return false;
@@ -91,7 +91,7 @@ namespace PaymentBilling.Domain.ValueObjects
             return true;
         }
 
-        private bool ValidateSecurityCode(string securityCode)
+        private static bool ValidateSecurityCode(string securityCode)
         {
             if (string.IsNullOrWhiteSpace(securityCode))
                 return false;
@@ -107,13 +107,13 @@ namespace PaymentBilling.Domain.ValueObjects
             return true;
         }
 
-        private string MaskCardNumber(string cardNumber)
+        private static string MaskCardNumber(string cardNumber)
         {
             cardNumber = cardNumber.Replace(" ", "").Replace("-", "");
             return $"**** **** **** {cardNumber.Substring(cardNumber.Length - 4)}";
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj is not CardData other)
                 return false;

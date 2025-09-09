@@ -14,7 +14,7 @@ namespace StudentManagement.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<Aluno?> GetByIdAsync(Guid id)
+        public async Task<Aluno> GetByIdAsync(Guid id)
         {
             // Inclui as coleções que fazem parte do agregado Aluno
             return await _context.Alunos

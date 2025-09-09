@@ -1,5 +1,3 @@
-using System;
-
 namespace StudentManagement.Application.DTOs
 {
     public class MatriculaDto
@@ -11,6 +9,6 @@ namespace StudentManagement.Application.DTOs
         public DateTime DataMatricula { get; set; }
         public string Status { get; set; } // Modificado de bool Ativa para string (representando o enum)
         public decimal PrecoPago { get; set; }
-        public HistoricoAprendizadoDto? HistoricoAprendizado { get; set; }
+        public HistoricoAprendizadoDto HistoricoAprendizado { get; set; }
     }
 }

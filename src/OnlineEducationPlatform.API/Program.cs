@@ -19,43 +19,44 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using IdentityService.Application.Interfaces;
 using StudentManagement.Application.Interfaces;
-using PaymentBilling.Application.Interfaces; // Mantido
+using PaymentBilling.Application.Interfaces;
 
-
-internal class Program
+namespace OnlineEducationPlatform.API
 {
-    private static void Main(string[] args)
+    static class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container.
-        builder.Services.AddControllers();
-
-        // Add HttpContextAccessor
-        builder.Services.AddHttpContextAccessor();
-
-        // Configure Swagger
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(c =>
+        private static void Main(string[] args)
         {
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "OnlineEducationPlatform.API",
-                Version = "v1",
-            });
+            var builder = WebApplication.CreateBuilder(args);
 
-            // Configure Swagger to use JWT Authentication
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
+            // Add services to the container.
+            builder.Services.AddControllers();
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            // Add HttpContextAccessor
+            builder.Services.AddHttpContextAccessor();
+
+            // Configure Swagger
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "OnlineEducationPlatform.API",
+                    Version = "v1",
+                });
+
+                // Configure Swagger to use JWT Authentication
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
         {
             new OpenApiSecurityScheme
             {
@@ -67,113 +68,114 @@ internal class Program
             },
             new List<string>()
         }
+                });
             });
-        });
 
-        // Configuração dos DbContexts
-        var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection");
-        builder.Services.AddDbContext<IdentityDbContext>(options =>
-            options.UseSqlServer(identityConnectionString));
+            // Configuração dos DbContexts
+            var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection");
+            builder.Services.AddDbContext<IdentityDbContext>(options =>
+                options.UseSqlServer(identityConnectionString));
 
-        var contentManagementConnectionString = builder.Configuration.GetConnectionString("ContentManagementConnection");
-        builder.Services.AddDbContext<ContentManagementDbContext>(options =>
-            options.UseSqlServer(contentManagementConnectionString));
+            var contentManagementConnectionString = builder.Configuration.GetConnectionString("ContentManagementConnection");
+            builder.Services.AddDbContext<ContentManagementDbContext>(options =>
+                options.UseSqlServer(contentManagementConnectionString));
 
-        var studentManagementConnectionString = builder.Configuration.GetConnectionString("StudentManagementConnection");
-        builder.Services.AddDbContext<StudentManagementDbContext>(options =>
-            options.UseSqlServer(studentManagementConnectionString));
+            var studentManagementConnectionString = builder.Configuration.GetConnectionString("StudentManagementConnection");
+            builder.Services.AddDbContext<StudentManagementDbContext>(options =>
+                options.UseSqlServer(studentManagementConnectionString));
 
-        var paymentBillingConnectionString = builder.Configuration.GetConnectionString("PaymentBillingConnection");
-        builder.Services.AddDbContext<PaymentBillingDbContext>(options =>
-            options.UseSqlServer(paymentBillingConnectionString));
+            var paymentBillingConnectionString = builder.Configuration.GetConnectionString("PaymentBillingConnection");
+            builder.Services.AddDbContext<PaymentBillingDbContext>(options =>
+                options.UseSqlServer(paymentBillingConnectionString));
 
-        // Register repositories and application services
+            // Register repositories and application services
 
-        // Content Management
-        builder.Services.AddScoped<ICursoRepository, CursoRepository>();
-        builder.Services.AddScoped<ICursoAppService, CursoAppService>();
+            // Content Management
+            builder.Services.AddScoped<ICursoRepository, CursoRepository>();
+            builder.Services.AddScoped<ICursoAppService, CursoAppService>();
 
-        // Student Management
-        builder.Services.AddScoped<StudentManagement.Domain.Repositories.IAlunoRepository, StudentManagement.Infrastructure.Repositories.AlunoRepository>();
-        builder.Services.AddScoped<IAlunoAppService, AlunoAppService>();
-        builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
+            // Student Management
+            builder.Services.AddScoped<StudentManagement.Domain.Repositories.IAlunoRepository, StudentManagement.Infrastructure.Repositories.AlunoRepository>();
+            builder.Services.AddScoped<IAlunoAppService, AlunoAppService>();
+            builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
 
-        // Payment Billing
-        builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
-        builder.Services.AddScoped<IPagamentoAppService, PagamentoAppService>();
+            // Payment Billing
+            builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
+            builder.Services.AddScoped<IPagamentoAppService, PagamentoAppService>();
 
-        // Identity
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
-        builder.Services.AddScoped<IAdminRepository, AdminRepository>();
-        builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-     
-        // Register MediatR
-        builder.Services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblies(
-                typeof(IdentityService.Application.Events.AlunoDaIdentidadeRegistradoEvent).Assembly,
-                typeof(StudentManagement.Application.EventHandlers.AlunoDaIdentidadeRegistradoEventHandler).Assembly,
-                typeof(PagamentoAppService).Assembly // Para futuros eventos/handlers do PaymentBilling
-            );
-        });
+            // Identity
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-        // Configure JWT Authentication
-        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-        var secretKey = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured."));
-
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            // Register MediatR
+            builder.Services.AddMediatR(cfg =>
             {
-                options.RequireHttpsMetadata = false; // Em produção, defina como true
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(secretKey), // Usar a secretKey derivada de JwtSettings:Secret
-                    ClockSkew = TimeSpan.Zero
-                };
+                cfg.RegisterServicesFromAssemblies(
+                    typeof(IdentityService.Application.Events.AlunoDaIdentidadeRegistradoEvent).Assembly,
+                    typeof(StudentManagement.Application.EventHandlers.AlunoDaIdentidadeRegistradoEventHandler).Assembly,
+                    typeof(PagamentoAppService).Assembly // Para futuros eventos/handlers do PaymentBilling
+                );
             });
 
-        // Configure CORS
-        // builder.Services.AddCors(...); // Se necessário, configure o CORS
+            // Configure JWT Authentication
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var secretKey = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured."));
 
-        var app = builder.Build();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false; // Em produção, defina como true
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(secretKey), // Usar a secretKey derivada de JwtSettings:Secret
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            // Configure CORS
+            // builder.Services.AddCors(...); // Se necessário, configure o CORS
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+
+            // app.UseCors("AllowSpecificOrigins"); // Se CORS estiver configurado
+
+            // app.UseMiddleware<ExceptionMiddleware>(); // Se você tiver um middleware de exceção customizado
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.MapControllers();
+
+            // Seed the database
+            using (var scope = app.Services.CreateScope())
+            {
+                // Aqui você pode adicionar lógica para aplicar migrations automaticamente ou semear dados iniciais, se necessário.
+                // Exemplo:
+                //// var identityDb = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+                //// identityDb.Database.Migrate();
+                //// var contentDb = scope.ServiceProvider.GetRequiredService<ContentManagementDbContext>();
+                //// contentDb.Database.Migrate();
+                //// etc.
+            }
+
+            app.Run();
         }
-
-        app.UseHttpsRedirection();
-
-        // app.UseCors("AllowSpecificOrigins"); // Se CORS estiver configurado
-
-        // app.UseMiddleware<ExceptionMiddleware>(); // Se você tiver um middleware de exceção customizado
-
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.MapControllers();
-
-        // Seed the database
-        using (var scope = app.Services.CreateScope())
-        {
-            // Aqui você pode adicionar lógica para aplicar migrations automaticamente ou semear dados iniciais, se necessário.
-            // Exemplo:
-            // var identityDb = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-            // identityDb.Database.Migrate();
-            // var contentDb = scope.ServiceProvider.GetRequiredService<ContentManagementDbContext>();
-            // contentDb.Database.Migrate();
-            // etc.
-        }
-
-        app.Run();
     }
 }

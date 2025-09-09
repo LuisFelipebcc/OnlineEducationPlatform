@@ -45,7 +45,7 @@ namespace StudentManagement.Domain.Entities
             return CompletedCourses.Average(c => c.FinalGrade);
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj is not LearningHistory other)
                 return false;
@@ -85,7 +85,7 @@ namespace StudentManagement.Domain.Entities
             CompletionDate = completionDate;
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj is not CourseProgress other)
                 return false;

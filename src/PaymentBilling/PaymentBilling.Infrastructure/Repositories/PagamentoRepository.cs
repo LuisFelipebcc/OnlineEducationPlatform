@@ -14,7 +14,7 @@ namespace PaymentBilling.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<Pagamento?> GetByIdAsync(Guid id)
+        public async Task<Pagamento> GetByIdAsync(Guid id)
         {
             return await _context.Pagamentos
                                  .Include(p => p.DadosCartaoUtilizado) // Se for um owned type
@@ -29,7 +29,7 @@ namespace PaymentBilling.Infrastructure.Repositories
                                  .ToListAsync();
         }
 
-        public async Task<Pagamento?> GetByReferenciaPedidoIdAsync(Guid referenciaPedidoId)
+        public async Task<Pagamento> GetByReferenciaPedidoIdAsync(Guid referenciaPedidoId)
         {
             return await _context.Pagamentos
                                  .Include(p => p.DadosCartaoUtilizado)

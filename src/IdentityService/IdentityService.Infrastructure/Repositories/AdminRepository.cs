@@ -13,7 +13,7 @@ namespace IdentityService.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<Admin?> GetByIdAsync(Guid id)
+        public async Task<Admin> GetByIdAsync(Guid id)
         {
             return await _context.Admins.FindAsync(id);
         }
@@ -26,7 +26,7 @@ namespace IdentityService.Infrastructure.Repositories
         public Task UpdateAsync(Admin admin)
         {
             _context.Admins.Update(admin);
-            // Ou _context.Entry(admin).State = EntityState.Modified;
+            //// Ou _context.Entry(admin).State = EntityState.Modified;
             return Task.CompletedTask;
         }
 

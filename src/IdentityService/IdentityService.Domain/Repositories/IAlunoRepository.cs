@@ -4,7 +4,7 @@ namespace IdentityService.Domain.Repositories
 {
     public interface IAlunoRepository
     {
-        Task<Aluno?> GetByIdAsync(Guid id); // O ID é o mesmo do User
+        Task<Aluno> GetByIdAsync(Guid id); // O ID é o mesmo do User
         Task AddAsync(Aluno aluno);
         Task UpdateAsync(Aluno aluno);
         Task RemoveAsync(Aluno aluno);

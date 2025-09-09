@@ -2,17 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Application.DTOs
 {
-    public class LoginDTO
-    {
-        [Required(ErrorMessage = "O email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
-        public string Email { get; set; }
 
-        [Required(ErrorMessage = "A senha é obrigatória")]
-        public string Senha { get; set; }
-    }
-
-    public class RegistroDTO
+    public class RegistroDto
     {
         [Required(ErrorMessage = "O nome é obrigatório")]
         public string Nome { get; set; }
@@ -30,18 +21,10 @@ namespace IdentityService.Application.DTOs
         public string ConfirmarSenha { get; set; }
     }
 
-    public class TokenDTO
+    public class TokenDto
     {
         public string Token { get; set; }
         public string RefreshToken { get; set; }
         public DateTime ExpiraEm { get; set; }
-    }
-
-    public class UsuarioDTO
-    {
-        public Guid Id { get; set; }
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public string Role { get; set; }
     }
 }

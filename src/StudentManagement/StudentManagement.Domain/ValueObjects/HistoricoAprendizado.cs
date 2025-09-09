@@ -40,10 +40,10 @@ namespace StudentManagement.Domain.ValueObjects
 
         // Value Objects devem implementar Equals e GetHashCode
         public override bool Equals(object obj) =>
-            obj is HistoricoAprendizado outro &&
-            ProgressoAulas.Count == outro.ProgressoAulas.Count &&
-            !ProgressoAulas.Except(outro.ProgressoAulas).Any() && // Compara dicionários
-            DataConclusaoCurso == outro.DataConclusaoCurso;
+    obj is HistoricoAprendizado outro &&
+    ProgressoAulas.Count == outro.ProgressoAulas.Count &&
+    !ProgressoAulas.Except(outro.ProgressoAulas).Any() &&
+    DataConclusaoCurso == outro.DataConclusaoCurso;
 
         public override int GetHashCode() => HashCode.Combine(ProgressoAulas, DataConclusaoCurso);
     }

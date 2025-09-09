@@ -28,7 +28,7 @@ namespace PaymentBilling.Application.Services
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task<PagamentoDto?> ProcessarPagamentoAsync(CriarPagamentoDto criarPagamentoDto)
+        public async Task<PagamentoDto> ProcessarPagamentoAsync(CriarPagamentoDto criarPagamentoDto)
         {
             // Criação do pagamento sem dados sensíveis, apenas com o token
             var pagamento = new Pagamento(
@@ -51,7 +51,7 @@ namespace PaymentBilling.Application.Services
                 _logger.LogInformation("Pagamento {PagamentoId} aprovado.", pagamento.Id);
 
                 // Se o gateway retornar dados mascarados, use:
-                // pagamento.AtualizarDetalhesCartaoGateway("****1234", "Nome Titular", "12/25");
+                //// pagamento.AtualizarDetalhesCartaoGateway("****1234", "Nome Titular", "12/25");
             }
             else
             {
@@ -81,7 +81,7 @@ namespace PaymentBilling.Application.Services
             return !paymentMethodToken.EndsWith("0");
         }
 
-        public async Task<PagamentoDto?> GetPagamentoByIdAsync(Guid id)
+        public async Task<PagamentoDto> GetPagamentoByIdAsync(Guid id)
         {
             var pagamento = await _pagamentoRepository.GetByIdAsync(id);
             return pagamento == null ? null : MapToPagamentoDto(pagamento);
@@ -93,7 +93,7 @@ namespace PaymentBilling.Application.Services
             return pagamentos.Select(MapToPagamentoDto);
         }
 
-        public async Task<PagamentoDto?> ConfirmarPagamentoInternoAsync(Guid pagamentoId, string codigoTransacaoGateway)
+        public async Task<PagamentoDto> ConfirmarPagamentoInternoAsync(Guid pagamentoId, string codigoTransacaoGateway)
         {
             var pagamento = await _pagamentoRepository.GetByIdAsync(pagamentoId);
             if (pagamento == null)

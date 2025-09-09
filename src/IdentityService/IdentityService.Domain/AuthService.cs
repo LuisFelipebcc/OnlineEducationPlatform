@@ -26,38 +26,38 @@ namespace IdentityService.Domain
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<TokenDTO> LoginAsync(LoginDTO loginDTO)
+        public async Task<TokenDto> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userManager.FindByEmailAsync(loginDTO.Email);
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
                 throw new InvalidOperationException("Invalid email or password");
             }
 
-            var result = await _userManager.CheckPasswordAsync(user, loginDTO.Password);
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
             if (!result)
             {
                 throw new InvalidOperationException("Invalid email or password");
             }
 
-            var token = await GenerateJwtTokenAsync(user, loginDTO.RememberMe);
+            var token = await GenerateJwtTokenAsync(user, loginDto.RememberMe);
             return token;
         }
 
-        public async Task<UserDTO> RegisterAsync(RegisterDTO registerDTO)
+        public async Task<UserDto> RegisterAsync(RegisterDto registerDto)
         {
-            if (registerDTO.Password != registerDTO.ConfirmPassword)
+            if (registerDto.Password != registerDto.ConfirmPassword)
             {
                 throw new InvalidOperationException("Passwords do not match");
             }
 
             var user = new IdentityUser
             {
-                UserName = registerDTO.Email,
-                Email = registerDTO.Email
+                UserName = registerDto.Email,
+                Email = registerDto.Email
             };
 
-            var result = await _userManager.CreateAsync(user, registerDTO.Password);
+            var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded)
             {
                 throw new InvalidOperationException(string.Join(", ", result.Errors.Select(e => e.Description)));
@@ -65,10 +65,10 @@ namespace IdentityService.Domain
 
             await _userManager.AddToRoleAsync(user, "Student");
 
-            return new UserDTO
+            return new UserDto
             {
                 Id = user.Id,
-                Name = registerDTO.Name,
+                Name = registerDto.Name,
                 Email = user.Email,
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
@@ -110,7 +110,7 @@ namespace IdentityService.Domain
             return true;
         }
 
-        public async Task<UserDTO> GetUserByIdAsync(string userId)
+        public async Task<UserDto> GetUserByIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -120,7 +120,7 @@ namespace IdentityService.Domain
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            return new UserDTO
+            return new UserDto
             {
                 Id = user.Id,
                 Email = user.Email,
@@ -133,7 +133,7 @@ namespace IdentityService.Domain
             };
         }
 
-        public async Task<bool> UpdateUserAsync(string userId, UserDTO userDTO)
+        public async Task<bool> UpdateUserAsync(string userId, UserDto userDto)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -141,8 +141,8 @@ namespace IdentityService.Domain
                 throw new InvalidOperationException("User not found");
             }
 
-            user.Email = userDTO.Email;
-            user.PhoneNumber = userDTO.PhoneNumber;
+            user.Email = userDto.Email;
+            user.PhoneNumber = userDto.PhoneNumber;
 
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
@@ -197,7 +197,7 @@ namespace IdentityService.Domain
             return result.Succeeded;
         }
 
-        private async Task<TokenDTO> GenerateJwtTokenAsync(IdentityUser user, bool rememberMe)
+        private async Task<TokenDto> GenerateJwtTokenAsync(IdentityUser user, bool rememberMe)
         {
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
@@ -223,7 +223,7 @@ namespace IdentityService.Domain
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             );
 
-            return new TokenDTO
+            return new TokenDto
             {
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
                 TokenType = "Bearer",

@@ -12,7 +12,7 @@ namespace StudentManagement.Domain.Entities
         public DateTime DataMatricula { get; set; }
         public StatusMatricula Status { get; private set; } // Modificado de bool Ativa
         public decimal PrecoPago { get; private set; } // Será definido após pagamento
-        public HistoricoAprendizado? HistoricoAprendizado { get; private set; }
+        public HistoricoAprendizado HistoricoAprendizado { get; private set; }
 
         // Construtor para EF Core
         private Matricula() { }

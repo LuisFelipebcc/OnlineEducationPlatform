@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-
 namespace IdentityService.Domain.DTOs
 {
-    public class UserDTO
+    public class UserDto
     {
         public string Id { get; set; }
         public string Name { get; set; }

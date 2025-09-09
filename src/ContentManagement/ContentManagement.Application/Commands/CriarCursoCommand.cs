@@ -6,14 +6,14 @@ namespace ContentManagement.Application.Commands
     public class CriarCursoCommand : IRequest<Guid>
     {
         public string Titulo { get; }
-        public string? Descricao { get; }
+        public string Descricao { get; }
         public decimal Preco { get; }
         public Guid InstrutorId { get; }
         public ConteudoProgramaticoDto ConteudoProgramatico { get; }
 
         public CriarCursoCommand(
             string titulo,
-            string? descricao,
+            string descricao,
             decimal preco,
             Guid instrutorId,
             ConteudoProgramaticoDto conteudoProgramatico)

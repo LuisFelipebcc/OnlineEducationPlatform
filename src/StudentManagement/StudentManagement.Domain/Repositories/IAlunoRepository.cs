@@ -7,10 +7,10 @@ namespace StudentManagement.Domain.Repositories
 {
     public interface IAlunoRepository
     {
-        Task<Aluno?> GetByIdAsync(Guid id); // O ID é o mesmo do User no IdentityService
+        Task<Aluno> GetByIdAsync(Guid id); // O ID é o mesmo do User no IdentityService
         Task<IEnumerable<Aluno>> GetAllAsync();
         // Poderiam existir métodos para buscar alunos por email, nome, etc.
-        // Ex: Task<Aluno?> GetByEmailAsync(string email);
+        //// Ex: Task<Aluno?> GetByEmailAsync(string email);
 
         Task AddAsync(Aluno aluno);
         Task UpdateAsync(Aluno aluno);

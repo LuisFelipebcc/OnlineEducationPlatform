@@ -21,8 +21,12 @@ namespace StudentManagement.Domain.Entities
         private readonly List<Certificado> _certificados = new();
         public IReadOnlyList<Certificado> Certificados => _certificados.AsReadOnly();
 
-        // Construtor para EF Core
-        private Aluno() { }
+        // Adicione inicialização padrão para propriedades não anuláveis no construtor privado
+        private Aluno()
+        {
+            NomeCompleto = string.Empty;
+            Email = string.Empty;
+        }
 
         public Aluno(Guid id, string nomeCompleto, string email)
         {

@@ -1,5 +1,3 @@
-using System;
-
 namespace IdentityService.Domain.Entities
 {
     /// <summary>

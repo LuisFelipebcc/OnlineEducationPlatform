@@ -4,7 +4,7 @@ namespace ContentManagement.Application.DTOs
     {
         public Guid Id { get; set; }
         public string Titulo { get; set; }
-        public string Descricao { get; set; }
+        public string Descricao { get; set; } = string.Empty;
         public Guid InstrutorId { get; set; }
         public DateTime DataPublicacao { get; set; }
         public decimal Preco { get; set; }

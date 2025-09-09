@@ -14,7 +14,7 @@ namespace ContentManagement.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<Curso?> GetByIdAsync(Guid id)
+        public async Task<Curso> GetByIdAsync(Guid id)
         {
             // Inclui as Aulas ao buscar um Curso, pois Aulas são parte do agregado Curso.
             return await _context.Cursos
@@ -39,7 +39,7 @@ namespace ContentManagement.Infrastructure.Repositories
         {
             // O EF Core rastreia mudanças em entidades carregadas.
             // Se o curso foi buscado e modificado, o SaveChangesAsync persistirá as alterações.
-            // Se for uma entidade desconectada, pode ser necessário _context.Cursos.Update(curso);
+            //// Se for uma entidade desconectada, pode ser necessário _context.Cursos.Update(curso);
             _context.Entry(curso).State = EntityState.Modified;
             return Task.CompletedTask;
         }

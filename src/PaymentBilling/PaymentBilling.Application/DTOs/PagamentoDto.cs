@@ -12,8 +12,8 @@ namespace PaymentBilling.Application.DTOs
         public DateTime DataCriacao { get; set; }
         public DateTime? DataProcessamento { get; set; }
         public string Status { get; set; } // String para facilitar a exibição
-        public string? NumeroCartaoMascarado { get; set; } // Apenas o mascarado para exibição
-        public string? GatewayPagamentoId { get; set; }
-        public string? MensagemErro { get; set; }
+        public string NumeroCartaoMascarado { get; set; } // Apenas o mascarado para exibição
+        public string GatewayPagamentoId { get; set; }
+        public string MensagemErro { get; set; }
     }
 }

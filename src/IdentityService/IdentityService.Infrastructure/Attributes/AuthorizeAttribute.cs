@@ -27,10 +27,8 @@ namespace IdentityService.Infrastructure.Attributes
             if (user == null || !user.Identity.IsAuthenticated)
             {
                 context.Result = new UnauthorizedResult();
-                return;
             }
-
-            if (_roles != null && _roles.Any())
+            else if (_roles != null && _roles.Any())
             {
                 var userRoles = user.Claims
                     .Where(c => c.Type == ClaimTypes.Role)
@@ -39,7 +37,6 @@ namespace IdentityService.Infrastructure.Attributes
                 if (!_roles.Any(role => userRoles.Contains(role)))
                 {
                     context.Result = new ForbidResult();
-                    return;
                 }
             }
         }

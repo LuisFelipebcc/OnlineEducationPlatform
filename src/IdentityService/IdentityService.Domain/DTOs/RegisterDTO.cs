@@ -1,6 +1,6 @@
 namespace IdentityService.Domain.DTOs
 {
-    public class RegisterDTO
+    public class RegisterDto
     {
         public string Name { get; set; }
         public string Email { get; set; }

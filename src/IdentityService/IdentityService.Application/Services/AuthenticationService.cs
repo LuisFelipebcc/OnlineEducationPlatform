@@ -46,7 +46,7 @@ namespace IdentityService.Application.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger)); // Adicionado
         }
 
-        public async Task<UsuarioDto?> RegistrarAsync(RegistrarUsuarioDto registrarUsuarioDto)
+        public async Task<UsuarioDto> RegistrarAsync(RegistrarUsuarioDto registrarUsuarioDto)
         {
             if (await _userRepository.EmailExistsAsync(registrarUsuarioDto.Email))
             {
@@ -105,7 +105,7 @@ namespace IdentityService.Application.Services
             };
         }
 
-        public async Task<UsuarioDto?> LoginAsync(LoginDto loginDto)
+        public async Task<UsuarioDto> LoginAsync(LoginDto loginDto)
         {
             var user = await _userRepository.GetByEmailAsync(loginDto.Email);
 
@@ -115,7 +115,7 @@ namespace IdentityService.Application.Services
             }
 
             // Buscar a persona associada para obter NomeCompleto e TipoPersona
-            Persona? persona = await _alunoRepository.GetByIdAsync(user.Id);
+            Persona persona = await _alunoRepository.GetByIdAsync(user.Id);
             string tipoPersona = PersonaAluno;
 
             if (persona == null)

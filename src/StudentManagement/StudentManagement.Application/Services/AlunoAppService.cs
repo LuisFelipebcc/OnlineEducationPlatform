@@ -26,7 +26,7 @@ namespace StudentManagement.Application.Services
             _cursoAppService = cursoAppService ?? throw new ArgumentNullException(nameof(cursoAppService));
         }
 
-        public async Task<AlunoDto?> GetAlunoByIdAsync(Guid alunoId)
+        public async Task<AlunoDto> GetAlunoByIdAsync(Guid alunoId)
         {
             var aluno = await _alunoRepository.GetByIdAsync(alunoId);
             return aluno == null ? null : await MapToAlunoDtoAsync(aluno);
@@ -43,8 +43,8 @@ namespace StudentManagement.Application.Services
             return alunoDtos;
         }
 
-        public async Task<AlunoDto?> CriarAlunoSincronizadoAsync(CriarAlunoSincronizadoDto dto)
-        {
+        public async Task<AlunoDto> CriarAlunoSincronizadoAsync(CriarAlunoSincronizadoDto dto)
+        {   
             if (await _alunoRepository.GetByIdAsync(dto.Id) != null)
             {
                 var alunoExistente = await _alunoRepository.GetByIdAsync(dto.Id);
@@ -57,7 +57,7 @@ namespace StudentManagement.Application.Services
             return await MapToAlunoDtoAsync(novoAluno);
         }
 
-        public async Task<MatriculaDto?> RealizarMatriculaAsync(Guid alunoId, RealizarMatriculaDto realizarMatriculaDto)
+        public async Task<MatriculaDto> RealizarMatriculaAsync(Guid alunoId, RealizarMatriculaDto realizarMatriculaDto)
         {
             var aluno = await _alunoRepository.GetByIdAsync(alunoId);
             if (aluno == null)
@@ -106,8 +106,8 @@ namespace StudentManagement.Application.Services
             return matriculasDto;
         }
 
-        public async Task<MatriculaDto?> GetMatriculaDetailsAsync(Guid alunoId, Guid matriculaId)
-        {
+        public async Task<MatriculaDto> GetMatriculaDetailsAsync(Guid alunoId, Guid matriculaId)
+        {   
             var aluno = await _alunoRepository.GetByIdAsync(alunoId);
             var matricula = aluno?.Matriculas.FirstOrDefault(m => m.Id == matriculaId);
 

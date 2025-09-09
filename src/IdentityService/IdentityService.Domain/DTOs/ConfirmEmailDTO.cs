@@ -1,6 +1,6 @@
 namespace IdentityService.Domain.DTOs
 {
-    public class ConfirmEmailDTO
+    public class ConfirmEmailDto
     {
         public string UserId { get; set; }
         public string Token { get; set; }

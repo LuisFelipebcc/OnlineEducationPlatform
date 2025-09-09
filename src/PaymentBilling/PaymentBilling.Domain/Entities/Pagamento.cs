@@ -1,8 +1,6 @@
-using System;
 using PaymentBilling.Domain.Enums;
 using PaymentBilling.Domain.ValueObjects;
-using MediatR; // Para INotification, se seus eventos herdarem disso
-// using Shared.Domain; // Se tiver uma classe base AggregateRoot
+using MediatR;
 
 namespace PaymentBilling.Domain.Entities
 {
@@ -15,9 +13,9 @@ namespace PaymentBilling.Domain.Entities
         public DateTime DataCriacao { get; private set; }
         public DateTime? DataProcessamento { get; private set; }
         public StatusPagamento Status { get; private set; }
-        public DadosCartao? DadosCartaoUtilizado { get; private set; } // Pode ser nulo se for outro método de pagamento
-        public string? GatewayPagamentoId { get; private set; } // ID da transação no gateway
-        public string? MensagemErro { get; private set; }
+        public DadosCartao DadosCartaoUtilizado { get; private set; } // Pode ser nulo se for outro método de pagamento
+        public string GatewayPagamentoId { get; private set; } // ID da transação no gateway
+        public string MensagemErro { get; private set; }
 
         private readonly List<INotification> _domainEvents = new List<INotification>();
         public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
@@ -41,7 +39,7 @@ namespace PaymentBilling.Domain.Entities
             DadosCartaoUtilizado = dadosCartao; // Pode ser nulo
 
             // Exemplo de como adicionar um evento (PagamentoCriadoEvent precisaria ser definido)
-            // AddDomainEvent(new PagamentoCriadoEvent(this.Id, this.AlunoId, this.ReferenciaPedidoId, this.Valor));
+            //// AddDomainEvent(new PagamentoCriadoEvent(this.Id, this.AlunoId, this.ReferenciaPedidoId, this.Valor));
         }
 
         public void MarcarComoProcessando()
@@ -60,7 +58,7 @@ namespace PaymentBilling.Domain.Entities
             GatewayPagamentoId = gatewayPagamentoId ?? throw new ArgumentNullException(nameof(gatewayPagamentoId));
             DataProcessamento = DataProcessamento ?? DateTime.UtcNow;
             // Exemplo:
-            // AddDomainEvent(new PagamentoAprovadoEvent(this.Id, this.AlunoId, this.ReferenciaPedidoId));
+            //// AddDomainEvent(new PagamentoAprovadoEvent(this.Id, this.AlunoId, this.ReferenciaPedidoId));
         }
 
         public void Rejeitar(string mensagemErro)
@@ -71,7 +69,7 @@ namespace PaymentBilling.Domain.Entities
             MensagemErro = mensagemErro;
             DataProcessamento = DataProcessamento ?? DateTime.UtcNow;
             // Exemplo:
-            // AddDomainEvent(new PagamentoRejeitadoEvent(this.Id, this.AlunoId, this.ReferenciaPedidoId, mensagemErro));
+            //// AddDomainEvent(new PagamentoRejeitadoEvent(this.Id, this.AlunoId, this.ReferenciaPedidoId, mensagemErro));
         }
 
         public void Cancelar()
@@ -79,7 +77,7 @@ namespace PaymentBilling.Domain.Entities
             // Adicionar lógica de negócio para cancelamento (ex: só pode cancelar se pendente ou aprovado e não processado)
             Status = StatusPagamento.Cancelado;
             // Exemplo:
-            // AddDomainEvent(new PagamentoCanceladoEvent(this.Id));
+            //// AddDomainEvent(new PagamentoCanceladoEvent(this.Id));
         }
 
         // Método para atualizar detalhes do cartão com informações seguras do gateway

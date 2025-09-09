@@ -19,7 +19,7 @@ namespace ContentManagement.Application.Services
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
-        public async Task<CursoDto?> GetCursoByIdAsync(Guid id)
+        public async Task<CursoDto> GetCursoByIdAsync(Guid id)
         {
             var curso = await _cursoRepository.GetByIdAsync(id);
             return curso == null ? null : MapToCursoDto(curso);
@@ -84,7 +84,7 @@ namespace ContentManagement.Application.Services
                 await _cursoRepository.RemoveAsync(curso);
         }
 
-        public async Task<AulaDto?> GetAulaByIdAsync(Guid cursoId, Guid aulaId)
+        public async Task<AulaDto> GetAulaByIdAsync(Guid cursoId, Guid aulaId)
         {
             var curso = await _cursoRepository.GetByIdAsync(cursoId);
             var aula = curso?.Aulas.FirstOrDefault(a => a.Id == aulaId);

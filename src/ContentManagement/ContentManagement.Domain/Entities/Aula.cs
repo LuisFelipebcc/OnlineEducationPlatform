@@ -40,12 +40,5 @@ namespace ContentManagement.Domain.Entities
             UrlVideo = novaUrlVideo ?? string.Empty;
         }
 
-        // Se a ordem puder ser alterada independentemente (cuidado com a consistência no Curso)
-        // public void AtualizarOrdem(int novaOrdem)
-        // {
-        //     if (novaOrdem <= 0)
-        //         throw new ArgumentOutOfRangeException(nameof(novaOrdem), "Ordem deve ser positiva.");
-        //     Ordem = novaOrdem;
-        // }
     }
 }
