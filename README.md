@@ -1,91 +1,112 @@
-# Plataforma de Educação Online
+# Online Education Platform
 
-Este projeto é uma plataforma de educação online desenvolvida com ASP.NET Core, seguindo os princípios do Domain-Driven Design (DDD), Command Query Responsibility Segregation (CQRS) e Test-Driven Development (TDD).
+Backend de uma plataforma de educação online desenvolvido com **ASP.NET Core**, estruturado com princípios de **Domain-Driven Design (DDD)**, **CQRS** e separação por contextos de negócio.
 
-## Estrutura do Projeto
+O projeto demonstra a modelagem de uma solução educacional modular, cobrindo gestão de conteúdo, alunos, matrículas e pagamentos.
 
-O projeto está organizado em bounded contexts (BCs) para separar as responsabilidades do domínio:
+## Objetivo
 
-1. **ContentManagement**: Responsável pela gestão de cursos e aulas
-2. **StudentManagement**: Responsável pela gestão de alunos e matrículas
-3. **PaymentBilling**: Responsável pelo processamento de pagamentos
+Construir uma base backend organizada para uma plataforma de cursos online, mantendo as regras de negócio separadas da infraestrutura e reduzindo o acoplamento entre os diferentes domínios da aplicação.
 
-### Arquitetura
+## Contextos de negócio
 
-Cada bounded context segue uma arquitetura em camadas:
+A solução está dividida nos seguintes bounded contexts:
 
-- **Domain**: Contém as entidades, value objects e interfaces dos repositórios
-- **Application**: Contém os comandos, queries e handlers do CQRS
-- **Infrastructure**: Contém as implementações dos repositórios e configurações do Entity Framework
+- **Content Management** — gestão de cursos e aulas.
+- **Student Management** — gestão de alunos e matrículas.
+- **Payment & Billing** — processamento e acompanhamento de pagamentos.
 
-## Tecnologias Utilizadas
+## Arquitetura
 
-- ASP.NET Core 7.0
+Cada contexto segue uma divisão em camadas:
+
+- **Domain** — entidades, value objects, contratos e regras de negócio.
+- **Application** — comandos, queries e handlers responsáveis pelos casos de uso.
+- **Infrastructure** — persistência, integrações e implementações técnicas.
+
+A separação busca manter o domínio independente de detalhes de banco de dados, frameworks e mecanismos de entrega.
+
+## Tecnologias
+
+- .NET 7
+- ASP.NET Core Web API
 - Entity Framework Core
-- SQL Server / SQLite
-- MediatR (CQRS)
+- MediatR
+- SQL Server
+- SQLite para desenvolvimento
 - JWT Authentication
-- Swagger/OpenAPI
-- xUnit (Testes)
+- Swagger / OpenAPI
+- xUnit
 
-## Requisitos
+## Capacidades implementadas
 
-- .NET 7.0 SDK
-- SQL Server (para produção)
-- SQLite (para desenvolvimento)
+- Cadastro e consulta de cursos.
+- Cadastro e consulta de aulas.
+- Consulta de aulas por curso.
+- Estrutura para gestão de alunos e matrículas.
+- Estrutura para processamento de pagamentos.
+- Autenticação baseada em JWT.
+- Persistência com Entity Framework Core.
+- Testes automatizados com xUnit.
 
-## Configuração do Ambiente
+## Execução local
 
-1. Clone o repositório
-2. Restaure os pacotes NuGet:
-   ```
-   dotnet restore
-   ```
-3. Execute as migrações do banco de dados:
-   ```
-   dotnet ef database update
-   ```
-4. Execute o projeto:
-   ```
-   dotnet run
-   ```
+### Pré-requisitos
+
+- .NET 7 SDK
+- SQL Server ou SQLite, conforme a configuração do ambiente
+
+### Configuração
+
+```bash
+git clone https://github.com/LuisFelipebcc/OnlineEducationPlatform.git
+cd OnlineEducationPlatform
+dotnet restore
+dotnet ef database update
+dotnet run
+```
+
+Após iniciar a aplicação, consulte o Swagger para visualizar e testar os endpoints disponíveis.
 
 ## Testes
 
-Para executar os testes:
-
-```
+```bash
 dotnet test
 ```
 
-## API Endpoints
+## Endpoints principais
 
-### Cursos
+| Método | Rota | Responsabilidade |
+|---|---|---|
+| `POST` | `/api/cursos` | Criar um curso |
+| `GET` | `/api/cursos/{id}` | Consultar um curso |
+| `POST` | `/api/aulas` | Criar uma aula |
+| `GET` | `/api/aulas/{id}` | Consultar uma aula |
+| `GET` | `/api/cursos/{cursoId}/aulas` | Listar aulas de um curso |
 
-- `POST /api/cursos`: Criar um novo curso
-- `GET /api/cursos/{id}`: Obter um curso por ID
+## Decisões de engenharia
 
-### Aulas
+- Uso de bounded contexts para evitar a concentração de responsabilidades em um único modelo.
+- Aplicação de CQRS para separar operações de escrita e leitura.
+- Isolamento das regras de domínio em relação à persistência.
+- SQLite como alternativa de menor atrito para desenvolvimento local.
+- Swagger como interface de exploração e validação da API.
 
-- `POST /api/aulas`: Criar uma nova aula
-- `GET /api/aulas/{id}`: Obter uma aula por ID
-- `GET /api/cursos/{cursoId}/aulas`: Obter todas as aulas de um curso
+## Próximas evoluções
 
-## Autenticação
+- Atualizar o projeto para uma versão LTS atual do .NET.
+- Documentar os fluxos completos de autenticação e autorização.
+- Adicionar pipeline de integração contínua.
+- Publicar diagrama de arquitetura e domínio.
+- Adicionar métricas de cobertura de testes.
+- Containerizar a aplicação e suas dependências.
+- Expandir os casos de uso de matrícula e pagamentos.
 
-A API utiliza autenticação JWT. Para obter um token:
+## Status
 
-1. Faça login com suas credenciais
-2. Use o token retornado no header `Authorization: Bearer {token}`
+Projeto de portfólio e estudo arquitetural. A documentação será evoluída junto com a validação técnica dos módulos existentes.
 
-## Contribuição
+## Autor
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+**Luis Felipe da Silva Sousa**  
+Backend Developer | .NET | Software Architecture | AI Engineering
